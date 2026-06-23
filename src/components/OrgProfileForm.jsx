@@ -8,6 +8,7 @@ const FOCUS_AREAS = [
   { value: "FIRST Robotics", label: "FIRST Robotics (FRC/FTC)" },
   { value: "Environment", label: "Environment" },
   { value: "Arts", label: "Arts" },
+  { value: "Human Services", label: "Human Services" },
 ];
 
 const inputBase =

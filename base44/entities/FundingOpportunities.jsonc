@@ -1,0 +1,49 @@
+{
+  "name": "FundingOpportunities",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "provider_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Cash Grant",
+        "Store Credit",
+        "Material Sponsorship"
+      ]
+    },
+    "value_amount": {
+      "type": "number"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "accepts_robotics_teams": {
+      "type": "boolean",
+      "default": false
+    },
+    "target_sectors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "application_url": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "provider_name",
+    "type",
+    "value_amount"
+  ]
+}

@@ -5,7 +5,7 @@
     "search_id": {
       "type": "string"
     },
-    "grant_id": {
+    "funding_id": {
       "type": "string"
     },
     "match_confidence": {
@@ -17,7 +17,7 @@
   },
   "required": [
     "search_id",
-    "grant_id",
+    "funding_id",
     "match_confidence"
   ]
 }

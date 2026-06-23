@@ -27,32 +27,30 @@ async function runGrantScan(formData) {
     timestamp: new Date().toISOString(),
   });
 
-  // 3. Fetch all grants
-  const grants = await base44.entities.Grants.list();
+  // 3. Fetch all funding opportunities
+  const opportunities = await base44.entities.FundingOpportunities.list();
 
-  // 4. Call LLM for matching
-  const grantsListText = grants
+  // 4. Build LLM prompt
+  const opportunitiesText = opportunities
     .map(
-      (g, i) =>
-        `[${i + 1}] ID: ${g.id}
-Title: ${g.grant_title}
-Funder: ${g.funder_name}
-Description: ${g.description}
-Max Award: $${g.award_amount_max}
-Deadline: ${g.deadline}
-Accepts Robotics Teams: ${g.accepts_robotics_teams}
-Tags: ${(g.criteria_tags || []).join(", ")}`
+      (o, i) =>
+        `[${i + 1}] ID: ${o.id}
+Title: ${o.title}
+Provider: ${o.provider_name}
+Type: ${o.type}
+Value: $${o.value_amount}
+Deadline: ${o.deadline || "Rolling/None"}
+Accepts Robotics Teams: ${o.accepts_robotics_teams}
+Target Sectors: ${(o.target_sectors || []).join(", ")}
+Description: ${o.description}`
     )
     .join("\n\n");
 
-  const roboticsBoost =
-    formData.focus_area === "FIRST Robotics"
-      ? "IMPORTANT: This organization is a FIRST Robotics (FTC/FRC) team. You MUST heavily boost the confidence score (by 20-30 points) for any grants where 'Accepts Robotics Teams' is TRUE. These are highly relevant."
-      : "";
+  const isRobotics = formData.focus_area === "FIRST Robotics";
 
-  const prompt = `You are a grant-matching AI assistant for nonprofits. Your task is to analyze a nonprofit's profile and score each grant based on eligibility and alignment.
+  const prompt = `You are a funding-matching AI for nonprofits. Analyze the organization profile and score each funding opportunity (0–100) based on eligibility and mission alignment.
 
-NONPROFIT PROFILE:
+ORGANIZATION PROFILE:
 Name: ${formData.nonprofit_name}
 EIN: ${formData.ein_number}
 Focus Area: ${formData.focus_area}
@@ -60,25 +58,24 @@ Annual Budget: $${formData.annual_budget || "Not specified"}
 Location: ${formData.location || "Not specified"}
 Mission & Keywords: ${formData.mission_keywords || "Not specified"}
 
-${roboticsBoost}
+${isRobotics ? "IMPORTANT: This is a FIRST Robotics (FTC/FRC) team. Boost scores by 25–30 points for all opportunities where 'Accepts Robotics Teams' is TRUE, and heavily prioritize robotics-specific cash grants, store credits, and material sponsorships (like Haas, Swyft, Polymaker)." : ""}
+${!isRobotics ? "Match the organization's focus area and mission to relevant target sectors. For general nonprofits, note how Store Credits (like Google Ad Grants) and Material Sponsorships save operational costs. Prioritize sector-aligned opportunities." : ""}
 
-AVAILABLE GRANTS:
-${grantsListText}
+AVAILABLE FUNDING OPPORTUNITIES:
+${opportunitiesText}
 
 INSTRUCTIONS:
-1. Score each grant from 0–100 based on how well it aligns with this nonprofit's profile, focus area, and mission keywords.
-2. If focus_area is "FIRST Robotics", boost scores for grants where accepts_robotics_teams is TRUE by 20–30 points.
-3. For each grant that scores above 60, write exactly 2 sentences explaining why this nonprofit is eligible. Be specific and reference the nonprofit's actual keywords and focus area.
-4. Return ONLY grants with a score above 60.
-5. Return your response as a JSON object matching the schema below.
+1. Score each opportunity 0–100 based on alignment with the nonprofit's focus area, mission keywords, and sector.
+2. For opportunities scoring above 60, write a brief 2-sentence explanation of eligibility — specifically note how this type of funding (cash grant, store credit, or material sponsorship) benefits this particular organization.
+3. Return ONLY opportunities scoring above 60, sorted by score descending.
 
 RESPONSE SCHEMA:
 {
   "matches": [
     {
-      "grant_id": "<the grant's ID string>",
+      "funding_id": "<opportunity ID string>",
       "match_confidence": <number 61–100>,
-      "match_reason": "<2-sentence eligibility explanation>"
+      "match_reason": "<2-sentence explanation>"
     }
   ]
 }`;
@@ -93,11 +90,11 @@ RESPONSE SCHEMA:
           items: {
             type: "object",
             properties: {
-              grant_id: { type: "string" },
+              funding_id: { type: "string" },
               match_confidence: { type: "number" },
               match_reason: { type: "string" },
             },
-            required: ["grant_id", "match_confidence", "match_reason"],
+            required: ["funding_id", "match_confidence", "match_reason"],
           },
         },
       },
@@ -106,20 +103,17 @@ RESPONSE SCHEMA:
   });
 
   const matches = llmResponse?.matches || [];
+  if (matches.length === 0) return [];
 
-  if (matches.length === 0) {
-    return [];
-  }
-
-  // 5. Save MatchingResults and build enriched result set
-  const grantMap = {};
-  grants.forEach((g) => { grantMap[g.id] = g; });
+  // 5. Save MatchingResults and enrich with opportunity data
+  const opportunityMap = {};
+  opportunities.forEach((o) => { opportunityMap[o.id] = o; });
 
   const resultsToSave = matches
-    .filter((m) => m.match_confidence > 60 && grantMap[m.grant_id])
+    .filter((m) => m.match_confidence > 60 && opportunityMap[m.funding_id])
     .map((m) => ({
       search_id: searchRecord.id,
-      grant_id: m.grant_id,
+      funding_id: m.funding_id,
       match_confidence: Math.min(100, Math.round(m.match_confidence)),
       match_reason: m.match_reason,
     }));
@@ -129,10 +123,9 @@ RESPONSE SCHEMA:
     savedResults = await base44.entities.MatchingResults.bulkCreate(resultsToSave);
   }
 
-  // Enrich with grant data and sort by confidence descending
-  const enriched = (Array.isArray(savedResults) ? savedResults : resultsToSave).map((r) => ({
+  const enriched = (Array.isArray(savedResults) && savedResults.length > 0 ? savedResults : resultsToSave).map((r) => ({
     ...r,
-    grant: grantMap[r.grant_id] || {},
+    opportunity: opportunityMap[r.funding_id] || {},
   }));
 
   enriched.sort((a, b) => b.match_confidence - a.match_confidence);
@@ -178,7 +171,7 @@ export default function Dashboard() {
           <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
             <Zap size={14} className="text-white" />
           </div>
-          <span className="text-base font-bold text-slate-800 tracking-tight">GrantFinder NP</span>
+          <span className="text-base font-bold text-slate-800 tracking-tight">Universal Non-Profit Funding & Voucher Matcher</span>
         </div>
         <div className="h-4 w-px bg-slate-200 mx-1" />
         <div className="flex items-center gap-1.5 text-xs text-slate-400">

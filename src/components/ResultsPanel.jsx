@@ -71,8 +71,8 @@ export default function ResultsPanel({ results, scanning, hasScanned }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Tailored Grant Opportunities</h2>
-          <p className="text-sm text-slate-500 mt-0.5">AI-matched grants ranked by eligibility confidence</p>
+          <h2 className="text-xl font-bold text-slate-800">Tailored Funding & Vouchers</h2>
+          <p className="text-sm text-slate-500 mt-0.5">AI-matched grants, store credits & sponsorships ranked by eligibility</p>
         </div>
         {hasScanned && !scanning && results.length > 0 && (
           <motion.div
