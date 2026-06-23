@@ -61,9 +61,21 @@ export default function GrantMatchCard({ result, index }) {
       {/* Top row: title + badge */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-800 text-base leading-snug">
-            {opportunity.title || "Untitled Opportunity"}
-          </h3>
+          {opportunity.application_url ? (
+            <a
+              href={opportunity.application_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-indigo-700 hover:text-indigo-900 hover:underline text-base leading-snug inline-flex items-center gap-1"
+            >
+              {opportunity.title || "Untitled Opportunity"}
+              <ExternalLink size={13} className="shrink-0 opacity-60" />
+            </a>
+          ) : (
+            <h3 className="font-semibold text-slate-800 text-base leading-snug">
+              {opportunity.title || "Untitled Opportunity"}
+            </h3>
+          )}
           <div className="flex items-center gap-1.5 mt-1">
             <Building size={12} className="text-slate-400 shrink-0" />
             <span className="text-xs text-slate-500 truncate">{opportunity.provider_name || "Unknown Provider"}</span>
