@@ -67,7 +67,7 @@ function NoResultsState() {
 
 export default function ResultsPanel({ results, scanning, hasScanned }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -89,7 +89,7 @@ export default function ResultsPanel({ results, scanning, hasScanned }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div>
         <AnimatePresence mode="wait">
           {scanning ? (
             <motion.div key="scanning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

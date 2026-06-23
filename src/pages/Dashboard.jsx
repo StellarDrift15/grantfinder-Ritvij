@@ -213,7 +213,7 @@ export default function Dashboard() {
 
         {/* Right: Results Panel */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6 h-full">
+          <div className="p-6">
             {scanError && (
               <motion.div
                 initial={{ opacity: 0 }}
