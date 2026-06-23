@@ -59,8 +59,12 @@ Annual Budget: $${formData.annual_budget || "Not specified"}
 Location: ${formData.location || "Not specified"}
 Mission & Keywords: ${formData.mission_keywords || "Not specified"}
 
-${isRobotics ? "IMPORTANT: This is a FIRST Robotics (FTC/FRC) team. Boost scores by 25–30 points for all opportunities where 'Accepts Robotics Teams' is TRUE, and heavily prioritize robotics-specific cash grants, store credits, and material sponsorships (like Haas, Swyft, Polymaker)." : ""}
-${!isRobotics ? "Match the organization's focus area and mission to relevant target sectors. For general nonprofits, note how Store Credits (like Google Ad Grants) and Material Sponsorships save operational costs. Prioritize sector-aligned opportunities." : ""}
+${isRobotics ? `CRITICAL ROBOTICS INSTRUCTIONS: This is a FIRST Robotics (FTC/FRC) team based in ${formData.location || "Texas"}.
+- AUTOMATICALLY score 90–100 for any opportunity with these keywords in the title or description: "Swyft", "Polymaker", "Gene Haas", "Haas Foundation", "FIRST in Texas", "FiT Grant", "FTC", "FRC", "FIRST Robotics" — these are highly accessible grants specifically designed for teams like this one.
+- Score 80–95 for ALL opportunities where 'Accepts Robotics Teams' is TRUE — robotics teams are the primary intended audience.
+- Score 70–85 for STEM/education material sponsorships and store credits (REV Robotics, AndyMark, Vex, Limelight, PTC/Creo, Autodesk) — these directly reduce team costs.
+- DO NOT score robotics-eligible grants below 75 unless there is a clear hard eligibility conflict (wrong geography, wrong program type).
+- Texas-based teams: give extra weight to Texas-specific grants (FIRST in Texas Foundation, Texas Instruments, etc.).` : "Match the organization's focus area and mission to relevant target sectors. For general nonprofits, note how Store Credits (like Google Ad Grants) and Material Sponsorships save operational costs. Prioritize sector-aligned opportunities."}
 
 AVAILABLE FUNDING OPPORTUNITIES:
 ${opportunitiesText}
@@ -110,8 +114,9 @@ RESPONSE SCHEMA:
   const opportunityMap = {};
   opportunities.forEach((o) => { opportunityMap[o.id] = o; });
 
+  const confidenceThreshold = isRobotics ? 50 : 60;
   const resultsToSave = matches
-    .filter((m) => m.match_confidence > 60 && opportunityMap[m.funding_id])
+    .filter((m) => m.match_confidence > confidenceThreshold && opportunityMap[m.funding_id])
     .map((m) => ({
       search_id: searchRecord.id,
       funding_id: m.funding_id,
