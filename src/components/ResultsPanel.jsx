@@ -111,7 +111,7 @@ export default function ResultsPanel({ results, scanning, hasScanned }) {
               exit={{ opacity: 0 }}
               className="flex flex-col gap-4"
             >
-              {results.map((result, i) => (
+              {results.filter(r => r.opportunity?.application_url).map((result, i) => (
                 <GrantMatchCard key={result.id || i} result={result} index={i} />
               ))}
             </motion.div>
