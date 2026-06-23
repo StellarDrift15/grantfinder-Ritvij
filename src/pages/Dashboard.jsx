@@ -7,19 +7,23 @@ import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
 
 async function runGrantScan(formData) {
-  // 1. Upsert nonprofit
+  const isRobotics = formData.focus_area === "FIRST Robotics";
+
+  // 1. Upsert nonprofit — only pass valid entity fields
+  const nonprofitData = {
+    nonprofit_name: formData.nonprofit_name,
+    ein_number: formData.ein_number,
+    focus_area: formData.focus_area,
+    annual_budget: formData.annual_budget,
+    location: formData.location,
+    mission_keywords: formData.mission_keywords,
+  };
   const existing = await base44.entities.Nonprofits.filter({ ein_number: formData.ein_number });
   let nonprofit;
   if (existing && existing.length > 0) {
-    nonprofit = await base44.entities.Nonprofits.update(existing[0].id, {
-      nonprofit_name: formData.nonprofit_name,
-      focus_area: formData.focus_area,
-      annual_budget: formData.annual_budget,
-      location: formData.location,
-      mission_keywords: formData.mission_keywords,
-    });
+    nonprofit = await base44.entities.Nonprofits.update(existing[0].id, nonprofitData);
   } else {
-    nonprofit = await base44.entities.Nonprofits.create(formData);
+    nonprofit = await base44.entities.Nonprofits.create(nonprofitData);
   }
 
   // 2. Create search history record
@@ -28,26 +32,38 @@ async function runGrantScan(formData) {
     timestamp: new Date().toISOString(),
   });
 
-  // 3. Fetch all funding opportunities
-  const opportunities = await base44.entities.FundingOpportunities.list();
+  // 3. Fetch funding opportunities — filter by relevance to reduce prompt size
+  const allOpportunities = await base44.entities.FundingOpportunities.list();
 
-  // 4. Build LLM prompt
+  // Pre-filter: for robotics, prioritize robotics grants + STEM; for others, filter by sector
+  let opportunities = allOpportunities;
+  if (isRobotics) {
+    // Robotics teams: robotics-flagged first, then STEM/Education
+    const roboticsFirst = allOpportunities.filter(o => o.accepts_robotics_teams);
+    const stemOthers = allOpportunities.filter(o => !o.accepts_robotics_teams && (o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
+    const rest = allOpportunities.filter(o => !o.accepts_robotics_teams && !(o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
+    opportunities = [...roboticsFirst, ...stemOthers, ...rest].slice(0, 60);
+  } else {
+    const focusSectors = {
+      Education: ['Education', 'STEM', 'Arts', 'Human Services'],
+      STEM: ['STEM', 'Education'],
+      Environment: ['Environment', 'Education', 'Human Services'],
+      Arts: ['Arts', 'Education', 'Human Services'],
+      "Human Services": ['Human Services', 'Education', 'Arts', 'Environment'],
+    };
+    const relevantSectors = focusSectors[formData.focus_area] || [];
+    const sectorMatches = allOpportunities.filter(o => (o.target_sectors || []).some(s => relevantSectors.includes(s)));
+    const others = allOpportunities.filter(o => !(o.target_sectors || []).some(s => relevantSectors.includes(s)));
+    opportunities = [...sectorMatches, ...others].slice(0, 60);
+  }
+
+  // 4. Build LLM prompt — compact format to stay within token limits
   const opportunitiesText = opportunities
     .map(
       (o, i) =>
-        `[${i + 1}] ID: ${o.id}
-Title: ${o.title}
-Provider: ${o.provider_name}
-Type: ${o.type}
-Value: $${o.value_amount}
-Deadline: ${o.deadline || "Rolling/None"}
-Accepts Robotics Teams: ${o.accepts_robotics_teams}
-Target Sectors: ${(o.target_sectors || []).join(", ")}
-Description: ${o.description}`
+        `[${i + 1}] ID:${o.id} | ${o.title} | ${o.provider_name} | ${o.type} | $${o.value_amount} | Robotics:${o.accepts_robotics_teams} | Sectors:${(o.target_sectors || []).join(",")} | ${(o.description || "").slice(0, 120)}`
     )
-    .join("\n\n");
-
-  const isRobotics = formData.focus_area === "FIRST Robotics";
+    .join("\n");
 
   const prompt = `You are a funding-matching AI for nonprofits. Analyze the organization profile and score each funding opportunity (0–100) based on eligibility and mission alignment.
 
@@ -87,6 +103,7 @@ RESPONSE SCHEMA:
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
+    model: "gpt_5_mini",
     response_json_schema: {
       type: "object",
       properties: {
