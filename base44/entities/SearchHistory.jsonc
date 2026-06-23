@@ -1,0 +1,17 @@
+{
+  "name": "SearchHistory",
+  "type": "object",
+  "properties": {
+    "nonprofit_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "nonprofit_id",
+    "timestamp"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Grants",
+  "type": "object",
+  "properties": {
+    "grant_title": {
+      "type": "string"
+    },
+    "funder_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "award_amount_max": {
+      "type": "number"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "accepts_robotics_teams": {
+      "type": "boolean",
+      "default": false
+    },
+    "criteria_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "grant_title",
+    "funder_name",
+    "award_amount_max"
+  ]
+}

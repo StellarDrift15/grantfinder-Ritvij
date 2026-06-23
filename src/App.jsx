@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import Dashboard from "./pages/Dashboard";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +35,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/" element={<Dashboard />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

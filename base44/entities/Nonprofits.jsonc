@@ -1,0 +1,36 @@
+{
+  "name": "Nonprofits",
+  "type": "object",
+  "properties": {
+    "nonprofit_name": {
+      "type": "string"
+    },
+    "ein_number": {
+      "type": "string"
+    },
+    "focus_area": {
+      "type": "string",
+      "enum": [
+        "Education",
+        "STEM",
+        "FIRST Robotics",
+        "Environment",
+        "Arts"
+      ]
+    },
+    "annual_budget": {
+      "type": "number"
+    },
+    "location": {
+      "type": "string"
+    },
+    "mission_keywords": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nonprofit_name",
+    "ein_number",
+    "focus_area"
+  ]
+}

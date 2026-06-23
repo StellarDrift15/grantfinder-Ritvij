@@ -1,0 +1,23 @@
+{
+  "name": "MatchingResults",
+  "type": "object",
+  "properties": {
+    "search_id": {
+      "type": "string"
+    },
+    "grant_id": {
+      "type": "string"
+    },
+    "match_confidence": {
+      "type": "number"
+    },
+    "match_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "search_id",
+    "grant_id",
+    "match_confidence"
+  ]
+}
