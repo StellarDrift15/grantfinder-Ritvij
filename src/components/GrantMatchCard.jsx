@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, Calendar, DollarSign, Sparkles, Building } from "lucide-react";
+import { Trophy, Calendar, DollarSign, Sparkles, Building, ExternalLink } from "lucide-react";
 
 function ConfidenceBadge({ score }) {
   const isGreen = score >= 80;
@@ -106,16 +106,28 @@ export default function GrantMatchCard({ result, index }) {
         <p className="text-sm text-slate-700 leading-relaxed">{result.match_reason || "No explanation provided."}</p>
       </div>
 
-      {/* Target Sectors */}
-      {opportunity.target_sectors && opportunity.target_sectors.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-3">
-          {opportunity.target_sectors.map((sector, i) => (
-            <span key={i} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500">
-              {sector}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* Bottom row: sectors + apply link */}
+      <div className="flex items-center justify-between mt-3 gap-3">
+        {opportunity.target_sectors && opportunity.target_sectors.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {opportunity.target_sectors.map((sector, i) => (
+              <span key={i} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500">
+                {sector}
+              </span>
+            ))}
+          </div>
+        ) : <div />}
+        {opportunity.application_url && (
+          <a
+            href={opportunity.application_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3.5 py-2 text-xs font-semibold text-white transition-colors"
+          >
+            Apply Now <ExternalLink size={12} />
+          </a>
+        )}
+      </div>
     </motion.div>
   );
 }
