@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, LayoutGrid } from "lucide-react";
+import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
+import ImportFromDriveModal from "@/components/ImportFromDriveModal";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
@@ -138,6 +139,7 @@ export default function Dashboard() {
   const [scanning, setScanning] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [scanError, setScanError] = useState(null);
+  const [showDriveImport, setShowDriveImport] = useState(false);
 
   const handleScanStart = () => {
     setScanning(true);
@@ -178,12 +180,25 @@ export default function Dashboard() {
           <LayoutGrid size={13} />
           <span>Dashboard</span>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            onClick={() => setShowDriveImport(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors"
+          >
+            <FolderOpen size={13} className="text-green-600" />
+            Import from Drive
+          </button>
           <span className="rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-600">
             AI-Powered Matching
           </span>
         </div>
       </header>
+      {showDriveImport && (
+        <ImportFromDriveModal
+          onClose={() => setShowDriveImport(false)}
+          onImported={() => {}}
+        />
+      )}
 
       {/* Split-screen body */}
       <div className="flex flex-1 overflow-hidden">
