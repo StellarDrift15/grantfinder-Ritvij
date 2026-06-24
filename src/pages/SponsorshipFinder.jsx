@@ -10,8 +10,25 @@ async function runSponsorshipScan(teamData) {
   const allSponsors = await base44.entities.Sponsorships.list();
   if (allSponsors.length === 0) return [];
 
+  // Pre-match mentor connections on the frontend before sending to AI
+  const mentorText = (teamData.mentor_connections || "").toLowerCase();
+  const mentorMatchedIds = new Set();
+  if (mentorText) {
+    allSponsors.forEach((s) => {
+      const name = (s.company_name || "").toLowerCase();
+      // Match if any word of the company name appears in the mentor text
+      const words = name.split(/\s+/).filter(w => w.length > 3);
+      if (words.some(w => mentorText.includes(w)) || mentorText.includes(name)) {
+        mentorMatchedIds.add(s.id);
+      }
+    });
+  }
+
   const sponsorsText = allSponsors
-    .map((s, i) => `[${i + 1}] ID:${s.id} | ${s.company_name} | Status:${s.sponsorship_status || "Unknown"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",") || "Any"} | Geo:${s.geographic_focus || "Any"} | ${s.description || ""} | CommunityNotes:${(s.community_notes || "").slice(0, 120)}`)
+    .map((s, i) => {
+      const mentorFlag = mentorMatchedIds.has(s.id) ? " | ⭐MENTOR_MATCH=TRUE (team has internal connection here — score 92-100, give step-by-step internal guidance)" : "";
+      return `[${i + 1}] ID:${s.id} | ${s.company_name} | Status:${s.sponsorship_status || "Unknown"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",") || "Any"} | Geo:${s.geographic_focus || "Any"} | ${s.description || ""} | CommunityNotes:${(s.community_notes || "").slice(0, 120)}${mentorFlag}`;
+    })
     .join("\n");
 
   const prompt = `You are a sponsorship-matching AI for FIRST Robotics teams. Analyze the team profile and score each potential sponsor (0–100) based on how good a fit they are.
@@ -82,9 +99,32 @@ CRITICAL INSTRUCTIONS:
     .map((m) => ({
       ...m,
       match_confidence: Math.min(100, Math.round(m.match_confidence)),
-      has_mentor_connection: !!m.has_mentor_connection,
+      // Use frontend pre-match as source of truth, not just LLM
+      has_mentor_connection: mentorMatchedIds.has(m.sponsor_id) || !!m.has_mentor_connection,
       sponsor: sponsorMap[m.sponsor_id] || {},
     }));
+
+  // Always ensure mentor-matched companies are at the very top
+  enriched.sort((a, b) => {
+    if (a.has_mentor_connection && !b.has_mentor_connection) return -1;
+    if (!a.has_mentor_connection && b.has_mentor_connection) return 1;
+    return b.match_confidence - a.match_confidence;
+  });
+
+  // Also ensure mentor-matched companies that might have scored below 45 still appear
+  const mentorIds = [...mentorMatchedIds];
+  const alreadyIncluded = new Set(enriched.map(e => e.sponsor_id));
+  mentorIds.forEach(id => {
+    if (!alreadyIncluded.has(id) && sponsorMap[id]) {
+      enriched.unshift({
+        sponsor_id: id,
+        match_confidence: 90,
+        match_reason: `Your team has an internal connection at ${sponsorMap[id].company_name}. Ask your mentor to check internally whether their company's community relations, HR, or CSR team has a sponsorship or matching gift program for FIRST Robotics teams. ${sponsorMap[id].community_notes || ""}`,
+        has_mentor_connection: true,
+        sponsor: sponsorMap[id],
+      });
+    }
+  });
 
   enriched.sort((a, b) => b.match_confidence - a.match_confidence);
   return enriched;
