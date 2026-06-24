@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import Dashboard from "./pages/Dashboard";
 import ColdCallingPage from "./pages/ColdCallingPage";
+import SponsorshipFinder from "./pages/SponsorshipFinder";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -38,6 +39,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/cold-calling" element={<ColdCallingPage />} />
+      <Route path="/sponsorship-finder" element={<SponsorshipFinder />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

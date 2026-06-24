@@ -1,0 +1,40 @@
+{
+  "name": "Sponsorships",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "typical_amount": {
+      "type": "number"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "website_url": {
+      "type": "string"
+    },
+    "accepts_robotics": {
+      "type": "boolean",
+      "default": true
+    },
+    "target_programs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "geographic_focus": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}

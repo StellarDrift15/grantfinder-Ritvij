@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Phone } from "lucide-react";
+import { Phone, Handshake } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
@@ -210,19 +210,33 @@ export default function Dashboard() {
           </span>
         </div>
       </header>
-      {/* Cold Calling Banner */}
-      <Link
-        to="/cold-calling"
-        className="flex items-center gap-3 mx-6 mt-3 rounded-xl bg-amber-50 border border-amber-200 px-5 py-3 hover:bg-amber-100 transition-colors group"
-      >
-        <div className="w-8 h-8 rounded-lg bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center transition-colors">
-          <Phone size={15} className="text-amber-600" />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-slate-800">Can't find a grant? Try cold calling local businesses.</p>
-          <p className="text-xs text-slate-500">A 5-step guide to raising money directly from your community →</p>
-        </div>
-      </Link>
+      {/* Quick Links */}
+      <div className="flex gap-3 mx-6 mt-3">
+        <Link
+          to="/sponsorship-finder"
+          className="flex-1 flex items-center gap-3 rounded-xl bg-purple-50 border border-purple-200 px-5 py-3 hover:bg-purple-100 transition-colors group"
+        >
+          <div className="w-8 h-8 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
+            <Handshake size={15} className="text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-800">Sponsorship Finder</p>
+            <p className="text-xs text-slate-500">AI-matched companies to cold email for sponsorships →</p>
+          </div>
+        </Link>
+        <Link
+          to="/cold-calling"
+          className="flex-1 flex items-center gap-3 rounded-xl bg-amber-50 border border-amber-200 px-5 py-3 hover:bg-amber-100 transition-colors group"
+        >
+          <div className="w-8 h-8 rounded-lg bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center transition-colors">
+            <Phone size={15} className="text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-800">Cold Calling Guide</p>
+            <p className="text-xs text-slate-500">5-step guide to raising money from local businesses →</p>
+          </div>
+        </Link>
+      </div>
 
       {showDriveImport && (
         <ImportFromDriveModal
