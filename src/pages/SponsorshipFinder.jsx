@@ -24,8 +24,9 @@ Location: ${teamData.location || "Not specified"}
 Team Size: ${teamData.team_size || "Not specified"}
 Years Active: ${teamData.years_active || "Not specified"}
 Description: ${teamData.description || "Not specified"}
+Mentor/Parent Company Connections: ${teamData.mentor_connections || "None provided"}
 
-SPONSOR STATUS PRIORITY (use these to weight scores):
+SPONSOR STATUS PRIORITY:
 - "Open Grant" / "Confirmed Sponsor" → score 85-100 (proven, accessible)
 - "Email Outreach" → score 70-90 (contactable, worth trying)
 - "Call Required" → score 65-85 (need to call)
@@ -33,14 +34,18 @@ SPONSOR STATUS PRIORITY (use these to weight scores):
 - "Needs Connection" → score 50-70 (need employee connection)
 - "Untried" → score 55-75 (other teams use them, worth trying)
 
+MENTOR CONNECTION RULE: If the team listed a mentor/parent who works at a company AND that company is in the list below AND that company offers sponsorship (status is NOT "Do not sponsor"), massively boost that company's score to 90-100 and set has_mentor_connection=true. The match_reason must then include a specific step-by-step internal approach: how to ask the mentor to inquire at their company, who they should contact internally (e.g. Community Relations, HR, CSR team), what to say, and what to ask for.
+
 AVAILABLE SPONSORS:
 ${sponsorsText}
 
 CRITICAL INSTRUCTIONS:
-1. Score each sponsor 0–100 based on status priority, program type match (FTC vs FRC vs FLL), location alignment, and community notes.
+1. Score each sponsor 0–100 based on status priority, program type match, location, and community notes.
 2. If a sponsor's target programs include the team's program type, boost score by 10.
-3. For each match, write a 2-sentence cold email tip: why they're a good fit and what to say.
-4. Return ALL sponsors scoring above 45, sorted by score descending.`;
+3. IMPORTANT: Always use the EXACT company name from the sponsor entry in your reasoning — never use a different company's name.
+4. For each match, write a 2-3 sentence actionable tip specific to THAT company: why they're a good fit and exactly what to say/do.
+5. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace.
+6. Return ALL sponsors scoring above 45, sorted by score descending.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -56,6 +61,7 @@ CRITICAL INSTRUCTIONS:
               sponsor_id: { type: "string" },
               match_confidence: { type: "number" },
               match_reason: { type: "string" },
+              has_mentor_connection: { type: "boolean" },
             },
             required: ["sponsor_id", "match_confidence", "match_reason"],
           },
@@ -72,10 +78,11 @@ CRITICAL INSTRUCTIONS:
   allSponsors.forEach((s) => { sponsorMap[s.id] = s; });
 
   const enriched = matches
-    .filter((m) => m.match_confidence > 50 && sponsorMap[m.sponsor_id])
+    .filter((m) => m.match_confidence > 45 && sponsorMap[m.sponsor_id])
     .map((m) => ({
       ...m,
       match_confidence: Math.min(100, Math.round(m.match_confidence)),
+      has_mentor_connection: !!m.has_mentor_connection,
       sponsor: sponsorMap[m.sponsor_id] || {},
     }));
 

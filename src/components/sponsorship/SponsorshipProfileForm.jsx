@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Zap, Users, Hash, MapPin, Calendar, Wrench } from "lucide-react";
+import { Loader2, Zap, Users, Hash, MapPin, Calendar, Wrench, UserCheck } from "lucide-react";
 
 const PROGRAM_TYPES = [
   { value: "FRC", label: "FRC (FIRST Robotics Competition)" },
@@ -20,6 +20,7 @@ export default function SponsorshipProfileForm({ onSubmit, loading }) {
     team_size: "",
     years_active: "",
     description: "",
+    mentor_connections: "",
   });
   const [error, setError] = useState(null);
 
@@ -96,6 +97,21 @@ export default function SponsorshipProfileForm({ onSubmit, loading }) {
           onChange={handleChange}
           placeholder="Briefly describe your team, needs, and what you'd offer sponsors (e.g. logo placement, social media mentions)."
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5 rounded-2xl bg-blue-50 border border-blue-100 p-4">
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 uppercase tracking-wider">
+          <UserCheck size={12} /> Mentor Connections (Optional)
+        </label>
+        <p className="text-xs text-blue-500 -mt-1">List any companies where your mentors, parents, or team members work.</p>
+        <textarea
+          className={inputBase + " resize-none min-h-[70px]"}
+          name="mentor_connections"
+          value={form.mentor_connections}
+          onChange={handleChange}
+          placeholder="e.g. Coach Mike works at Boeing, parent works at Google, mentor at Lockheed Martin..."
+        />
+        <p className="text-xs text-slate-400">The AI will give you specific advice on how to approach these connections internally to unlock sponsorship.</p>
       </div>
 
       {error && (

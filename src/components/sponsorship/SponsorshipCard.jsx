@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DollarSign, Sparkles, Building, ExternalLink, Globe, Mail, Phone, MessageCircle } from "lucide-react";
+import { DollarSign, Sparkles, Building, ExternalLink, Globe, Mail, Phone, MessageCircle, UserCheck } from "lucide-react";
 
 function ConfidenceBadge({ score }) {
   const isGreen = score >= 80;
@@ -66,13 +66,23 @@ export default function SponsorshipCard({ result, index }) {
         ))}
       </div>
 
-      <div className="rounded-xl bg-purple-50 border border-purple-100 px-4 py-3 mb-3">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <Sparkles size={12} className="text-purple-500" />
-          <span className="text-xs font-semibold text-purple-600 uppercase tracking-wider">Why Contact Them</span>
+      {result.has_mentor_connection ? (
+        <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <UserCheck size={12} className="text-blue-600" />
+            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">🎯 You Have an Internal Connection!</span>
+          </div>
+          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{result.match_reason || "No explanation provided."}</p>
         </div>
-        <p className="text-sm text-slate-700 leading-relaxed">{result.match_reason || "No explanation provided."}</p>
-      </div>
+      ) : (
+        <div className="rounded-xl bg-purple-50 border border-purple-100 px-4 py-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Sparkles size={12} className="text-purple-500" />
+            <span className="text-xs font-semibold text-purple-600 uppercase tracking-wider">Why Contact Them</span>
+          </div>
+          <p className="text-sm text-slate-700 leading-relaxed">{result.match_reason || "No explanation provided."}</p>
+        </div>
+      )}
 
       {sponsor.community_notes && (
         <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 mb-3">
