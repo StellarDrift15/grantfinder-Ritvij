@@ -39,7 +39,7 @@ async function runSponsorshipScan(teamData) {
   const sponsorsText = allSponsors
     .map((s, i) => {
       const mentorFlag = mentorMatchedIds.has(s.id) ? " | ⭐MENTOR_MATCH=TRUE (team has internal connection here — score 92-100, give step-by-step internal guidance)" : "";
-      return `[${i + 1}] ID:${s.id} | ${s.company_name} | Status:${s.sponsorship_status || "Unknown"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",") || "Any"} | Geo:${s.geographic_focus || "Any"} | ${s.description || ""} | CommunityNotes:${(s.community_notes || "").slice(0, 120)}${mentorFlag}`;
+      return `[${i + 1}] ID:${s.id} | ${s.company_name} | Status:${s.sponsorship_status || "Unknown"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",") || "Any"} | Geo:${s.geographic_focus || "Any"} | Phone:${s.contact_phone || "None"} | Email:${s.contact_email || "None"} | ${s.description || ""} | CommunityNotes:${(s.community_notes || "").slice(0, 120)}${mentorFlag}`;
     })
     .join("\n");
 
@@ -73,8 +73,9 @@ CRITICAL INSTRUCTIONS:
   2. If a sponsor's target programs include the team's program type, boost score by 10.
   3. MANDATORY: Each entry in your response must include "company_name" set to the EXACT company name from that sponsor's entry above. Do NOT copy the company name from a different entry.
   4. The match_reason for each entry MUST mention that company's EXACT name in the first sentence. Write as if you are speaking about ONLY that one company.
-  5. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace — referencing THAT company by name throughout.
-  6. Return ALL sponsors scoring above 45, sorted by score descending.`;
+  5. OUTREACH ORDER: When a phone number is available for a sponsor (status "Call Required" or any sponsor with contact info), ALWAYS recommend calling first before emailing. Format advice as: "Call [company] first at their main number, introduce your team, then follow up with an email." If no phone contact is available, then recommend email outreach.
+  6. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace — referencing THAT company by name throughout.
+  7. Return ALL sponsors scoring above 45, sorted by score descending.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
