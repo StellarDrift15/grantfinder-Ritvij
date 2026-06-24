@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
+import ColdCallingGuide from "@/components/ColdCallingGuide";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
@@ -264,6 +265,9 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+
+      {/* Cold Calling Guide */}
+      <ColdCallingGuide />
     </div>
   );
 }
