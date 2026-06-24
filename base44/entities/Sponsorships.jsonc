@@ -8,6 +8,12 @@
     "contact_email": {
       "type": "string"
     },
+    "contact_phone": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string"
+    },
     "typical_amount": {
       "type": "number"
     },
@@ -24,6 +30,18 @@
       "type": "boolean",
       "default": true
     },
+    "sponsorship_status": {
+      "type": "string",
+      "enum": [
+        "Confirmed Sponsor",
+        "Open Grant",
+        "Email Outreach",
+        "Call Required",
+        "EDU Discounts",
+        "Needs Connection",
+        "Untried"
+      ]
+    },
     "target_programs": {
       "type": "array",
       "items": {
@@ -31,6 +49,9 @@
       }
     },
     "geographic_focus": {
+      "type": "string"
+    },
+    "community_notes": {
       "type": "string"
     }
   },

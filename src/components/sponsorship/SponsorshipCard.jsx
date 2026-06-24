@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DollarSign, Sparkles, Building, ExternalLink, Globe, Mail } from "lucide-react";
+import { DollarSign, Sparkles, Building, ExternalLink, Globe, Mail, Phone, MessageCircle } from "lucide-react";
 
 function ConfidenceBadge({ score }) {
   const isGreen = score >= 80;
@@ -53,6 +53,9 @@ export default function SponsorshipCard({ result, index }) {
             <span className="font-semibold text-slate-700">Usually offers {formatCurrency(sponsor.typical_amount)}</span>
           </div>
         )}
+        {sponsor.sponsorship_status && (
+          <span className="rounded-full bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-600">{sponsor.sponsorship_status}</span>
+        )}
         {sponsor.geographic_focus && (
           <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500">
             <Globe size={10} className="inline mr-1" />{sponsor.geographic_focus}
@@ -71,10 +74,25 @@ export default function SponsorshipCard({ result, index }) {
         <p className="text-sm text-slate-700 leading-relaxed">{result.match_reason || "No explanation provided."}</p>
       </div>
 
+      {sponsor.community_notes && (
+        <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <MessageCircle size={12} className="text-amber-500" />
+            <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Community Notes</span>
+          </div>
+          <p className="text-xs text-slate-600 leading-relaxed">{sponsor.community_notes}</p>
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         {sponsor.contact_email && (
           <a href={`mailto:${sponsor.contact_email}`} className="flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 px-3.5 py-2 text-xs font-semibold text-white transition-colors">
             <Mail size={12} /> Email Them
+          </a>
+        )}
+        {sponsor.contact_phone && (
+          <a href={`tel:${sponsor.contact_phone}`} className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white transition-colors">
+            <Phone size={12} /> Call
           </a>
         )}
         {sponsor.website_url && (

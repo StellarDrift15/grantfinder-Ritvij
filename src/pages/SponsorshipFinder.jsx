@@ -11,10 +11,10 @@ async function runSponsorshipScan(teamData) {
   if (allSponsors.length === 0) return [];
 
   const sponsorsText = allSponsors
-    .map((s, i) => `[${i + 1}] ID:${s.id} | ${s.company_name} | Industry:${s.industry || "N/A"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",")} | Geo:${s.geographic_focus || "Any"} | ${(s.description || "").slice(0, 150)}`)
+    .map((s, i) => `[${i + 1}] ID:${s.id} | ${s.company_name} | Status:${s.sponsorship_status || "Unknown"} | Typical:$${s.typical_amount || "N/A"} | Programs:${(s.target_programs || []).join(",") || "Any"} | Geo:${s.geographic_focus || "Any"} | ${s.description || ""} | CommunityNotes:${(s.community_notes || "").slice(0, 120)}`)
     .join("\n");
 
-  const prompt = `You are a sponsorship-matching AI for FIRST Robotics teams. Analyze the team profile and score each potential sponsor (0–100) based on how good a fit they are for a cold email outreach.
+  const prompt = `You are a sponsorship-matching AI for FIRST Robotics teams. Analyze the team profile and score each potential sponsor (0–100) based on how good a fit they are.
 
 TEAM PROFILE:
 Name: ${teamData.team_name}
@@ -25,13 +25,22 @@ Team Size: ${teamData.team_size || "Not specified"}
 Years Active: ${teamData.years_active || "Not specified"}
 Description: ${teamData.description || "Not specified"}
 
-AVAILABLE SPONSORS (companies known to sponsor robotics teams via cold email):
+SPONSOR STATUS PRIORITY (use these to weight scores):
+- "Open Grant" / "Confirmed Sponsor" → score 85-100 (proven, accessible)
+- "Email Outreach" → score 70-90 (contactable, worth trying)
+- "Call Required" → score 65-85 (need to call)
+- "EDU Discounts" → score 60-80 (not cash but saves money)
+- "Needs Connection" → score 50-70 (need employee connection)
+- "Untried" → score 55-75 (other teams use them, worth trying)
+
+AVAILABLE SPONSORS:
 ${sponsorsText}
 
-INSTRUCTIONS:
-1. Score each sponsor 0–100 based on alignment with the team's program type, location, and needs.
-2. For sponsors scoring above 50, write a brief 2-sentence explanation of why this company is a good fit and what to mention in the cold email.
-3. Return ONLY sponsors scoring above 50, sorted by score descending.`;
+CRITICAL INSTRUCTIONS:
+1. Score each sponsor 0–100 based on status priority, program type match (FTC vs FRC vs FLL), location alignment, and community notes.
+2. If a sponsor's target programs include the team's program type, boost score by 10.
+3. For each match, write a 2-sentence cold email tip: why they're a good fit and what to say.
+4. Return ALL sponsors scoring above 45, sorted by score descending.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
