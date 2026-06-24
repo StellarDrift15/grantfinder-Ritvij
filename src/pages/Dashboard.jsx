@@ -205,13 +205,6 @@ export default function Dashboard() {
           <span>Dashboard</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <button
-            onClick={() => setShowDriveImport(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors"
-          >
-            <FolderOpen size={13} className="text-green-600" />
-            Import from Drive
-          </button>
           <span className="rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-600">
             AI-Powered Matching
           </span>
