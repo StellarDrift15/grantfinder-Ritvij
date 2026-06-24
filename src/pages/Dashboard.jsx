@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Phone } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
-import ColdCallingGuide from "@/components/ColdCallingGuide";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
@@ -216,6 +217,20 @@ export default function Dashboard() {
           </span>
         </div>
       </header>
+      {/* Cold Calling Banner */}
+      <Link
+        to="/cold-calling"
+        className="flex items-center gap-3 mx-6 mt-3 rounded-xl bg-amber-50 border border-amber-200 px-5 py-3 hover:bg-amber-100 transition-colors group"
+      >
+        <div className="w-8 h-8 rounded-lg bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center transition-colors">
+          <Phone size={15} className="text-amber-600" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-slate-800">Can't find a grant? Try cold calling local businesses.</p>
+          <p className="text-xs text-slate-500">A 5-step guide to raising money directly from your community →</p>
+        </div>
+      </Link>
+
       {showDriveImport && (
         <ImportFromDriveModal
           onClose={() => setShowDriveImport(false)}
@@ -266,8 +281,6 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* Cold Calling Guide */}
-      <ColdCallingGuide />
     </div>
   );
 }

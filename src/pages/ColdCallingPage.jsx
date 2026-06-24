@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Phone, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Phone, CheckCircle2, AlertCircle, MessageSquare, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 
 const STEPS = [
   {
@@ -61,51 +62,56 @@ We're looking for sponsors at the $[amount] level, which would cover [specific c
 
 Would that be something you'd be open to discussing?"`;
 
-export default function ColdCallingGuide() {
-  const [open, setOpen] = useState(false);
+export default function ColdCallingPage() {
   const [scriptOpen, setScriptOpen] = useState(false);
 
   return (
-    <div className="border-t border-slate-100 bg-white">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
-            <Phone size={15} className="text-amber-600" />
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-bold text-slate-800">Can't find a grant? Try cold calling local businesses.</p>
-            <p className="text-xs text-slate-500">A practical guide to raising money directly from your community</p>
-          </div>
-        </div>
-        {open ? <ChevronUp size={16} className="text-slate-400 shrink-0" /> : <ChevronDown size={16} className="text-slate-400 shrink-0" />}
-      </button>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+      {/* Top Nav */}
+      <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 gap-3 shadow-sm">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to Grant Finder
+        </Link>
+      </header>
 
-      {open && (
-        <div className="px-6 pb-8 pt-2">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+              <Phone size={18} className="text-amber-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">Cold Calling Local Businesses</h1>
+              <p className="text-sm text-slate-500">A practical guide to raising money directly from your community</p>
+            </div>
+          </div>
+
           {/* Callout */}
-          <div className="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 mb-6">
+          <div className="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 my-6">
             <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800 leading-relaxed">
+            <p className="text-sm text-amber-800 leading-relaxed">
               Local businesses often give $250–$2,000 to community organizations — and a 15-minute phone call can close it faster than a 6-month grant cycle. Many robotics teams and nonprofits raise 30–50% of their budget this way.
             </p>
           </div>
 
           {/* Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="flex flex-col gap-5 mb-8">
             {STEPS.map((step) => (
-              <div key={step.number} className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-indigo-500 font-mono">{step.number}</span>
-                  <h3 className="text-sm font-semibold text-slate-800">{step.title}</h3>
+              <div key={step.number} className="rounded-xl border border-slate-200 p-5 bg-white">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-sm font-bold text-indigo-500 font-mono bg-indigo-50 rounded-lg px-2.5 py-1">{step.number}</span>
+                  <h3 className="text-base font-semibold text-slate-800">{step.title}</h3>
                 </div>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-2.5 ml-1">
                   {step.tips.map((tip, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckCircle2 size={12} className="text-emerald-500 shrink-0 mt-0.5" />
-                      <span className="text-xs text-slate-600 leading-relaxed">{tip}</span>
+                    <li key={i} className="flex items-start gap-2.5">
+                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-600 leading-relaxed">{tip}</span>
                     </li>
                   ))}
                 </ul>
@@ -117,24 +123,24 @@ export default function ColdCallingGuide() {
           <div className="rounded-xl border border-indigo-100 bg-indigo-50">
             <button
               onClick={() => setScriptOpen(!scriptOpen)}
-              className="w-full flex items-center justify-between px-4 py-3"
+              className="w-full flex items-center justify-between px-5 py-4"
             >
-              <div className="flex items-center gap-2">
-                <MessageSquare size={14} className="text-indigo-500" />
-                <span className="text-xs font-semibold text-indigo-700">Sample Phone Script</span>
+              <div className="flex items-center gap-2.5">
+                <MessageSquare size={16} className="text-indigo-500" />
+                <span className="text-sm font-semibold text-indigo-700">Sample Phone Script</span>
               </div>
-              {scriptOpen ? <ChevronUp size={14} className="text-indigo-400" /> : <ChevronDown size={14} className="text-indigo-400" />}
+              {scriptOpen ? <ChevronUp size={16} className="text-indigo-400" /> : <ChevronDown size={16} className="text-indigo-400" />}
             </button>
             {scriptOpen && (
-              <div className="px-4 pb-4">
-                <pre className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed bg-white rounded-lg border border-indigo-100 p-4 font-body">
+              <div className="px-5 pb-5">
+                <pre className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-white rounded-lg border border-indigo-100 p-5 font-body">
                   {SCRIPT}
                 </pre>
               </div>
             )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
