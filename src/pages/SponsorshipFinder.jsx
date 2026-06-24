@@ -10,15 +10,27 @@ async function runSponsorshipScan(teamData) {
   const allSponsors = await base44.entities.Sponsorships.list();
   if (allSponsors.length === 0) return [];
 
-  // Pre-match mentor connections on the frontend before sending to AI
+  // Pre-match mentor connections on the frontend — multiple strategies for robustness
   const mentorText = (teamData.mentor_connections || "").toLowerCase();
   const mentorMatchedIds = new Set();
+
+  function isMentorMatch(companyName) {
+    if (!mentorText) return false;
+    const name = companyName.toLowerCase().trim();
+    // Strategy 1: exact full name
+    if (mentorText.includes(name)) return true;
+    // Strategy 2: all significant words present (ignores Inc, LLC, etc.)
+    const stopWords = new Set(["the", "and", "for", "inc", "llc", "ltd", "corp", "co", "company"]);
+    const words = name.split(/\s+/).filter(w => w.length > 1 && !stopWords.has(w));
+    if (words.length > 0 && words.every(w => mentorText.includes(w))) return true;
+    // Strategy 3: any significant word as a whole word (catches "Microsoft" in "coach at Microsoft Volunteer")
+    if (words.some(w => new RegExp(`\\b${w}\\b`).test(mentorText))) return true;
+    return false;
+  }
+
   if (mentorText) {
     allSponsors.forEach((s) => {
-      const name = (s.company_name || "").toLowerCase();
-      // Match if any word of the company name appears in the mentor text
-      const words = name.split(/\s+/).filter(w => w.length > 3);
-      if (words.some(w => mentorText.includes(w)) || mentorText.includes(name)) {
+      if (isMentorMatch(s.company_name || "")) {
         mentorMatchedIds.add(s.id);
       }
     });
@@ -94,36 +106,45 @@ CRITICAL INSTRUCTIONS:
   const sponsorMap = {};
   allSponsors.forEach((s) => { sponsorMap[s.id] = s; });
 
+  // Track all LLM-returned sponsor IDs (before filtering) to avoid double-adding in fallback
+  const llmReturnedIds = new Set(matches.map(m => m.sponsor_id));
+
   const enriched = matches
     .filter((m) => m.match_confidence > 45 && sponsorMap[m.sponsor_id])
     .map((m) => ({
       ...m,
       match_confidence: Math.min(100, Math.round(m.match_confidence)),
-      // Use frontend pre-match as source of truth, not just LLM
       has_mentor_connection: mentorMatchedIds.has(m.sponsor_id) || !!m.has_mentor_connection,
       sponsor: sponsorMap[m.sponsor_id] || {},
     }));
 
-  // Always ensure mentor-matched companies are at the very top
+  // Guarantee: inject any mentor-matched company the LLM missed or scored too low
+  mentorMatchedIds.forEach(id => {
+    if (sponsorMap[id]) {
+      const alreadyIn = enriched.find(e => e.sponsor_id === id);
+      if (alreadyIn) {
+        // Make sure it's flagged and boosted
+        alreadyIn.has_mentor_connection = true;
+        alreadyIn.match_confidence = Math.max(alreadyIn.match_confidence, 90);
+      } else {
+        // LLM missed it entirely — add it manually
+        const s = sponsorMap[id];
+        enriched.unshift({
+          sponsor_id: id,
+          match_confidence: 92,
+          match_reason: `Your team has an internal connection at ${s.company_name}! Ask your mentor/coach to:\n1. Contact their company's Community Relations or CSR team directly.\n2. Ask specifically about volunteer grant programs (many companies like Microsoft match volunteer hours with cash donations to nonprofits/STEM teams).\n3. Have them mention your FIRST Robotics team by name and your EIN number.\n4. Request any available matching gift, volunteer hour grants, or direct STEM sponsorship.\n${s.community_notes ? "\nNote: " + s.community_notes : ""}`,
+          has_mentor_connection: true,
+          sponsor: s,
+        });
+      }
+    }
+  });
+
+  // Sort: mentor connections first, then by confidence
   enriched.sort((a, b) => {
     if (a.has_mentor_connection && !b.has_mentor_connection) return -1;
     if (!a.has_mentor_connection && b.has_mentor_connection) return 1;
     return b.match_confidence - a.match_confidence;
-  });
-
-  // Also ensure mentor-matched companies that might have scored below 45 still appear
-  const mentorIds = [...mentorMatchedIds];
-  const alreadyIncluded = new Set(enriched.map(e => e.sponsor_id));
-  mentorIds.forEach(id => {
-    if (!alreadyIncluded.has(id) && sponsorMap[id]) {
-      enriched.unshift({
-        sponsor_id: id,
-        match_confidence: 90,
-        match_reason: `Your team has an internal connection at ${sponsorMap[id].company_name}. Ask your mentor to check internally whether their company's community relations, HR, or CSR team has a sponsorship or matching gift program for FIRST Robotics teams. ${sponsorMap[id].community_notes || ""}`,
-        has_mentor_connection: true,
-        sponsor: sponsorMap[id],
-      });
-    }
   });
 
   enriched.sort((a, b) => b.match_confidence - a.match_confidence);
