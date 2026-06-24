@@ -69,12 +69,12 @@ AVAILABLE SPONSORS:
 ${sponsorsText}
 
 CRITICAL INSTRUCTIONS:
-1. Score each sponsor 0–100 based on status priority, program type match, location, and community notes.
-2. If a sponsor's target programs include the team's program type, boost score by 10.
-3. IMPORTANT: Always use the EXACT company name from the sponsor entry in your reasoning — never use a different company's name.
-4. For each match, write a 2-3 sentence actionable tip specific to THAT company: why they're a good fit and exactly what to say/do.
-5. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace.
-6. Return ALL sponsors scoring above 45, sorted by score descending.`;
+  1. Score each sponsor 0–100 based on status priority, program type match, location, and community notes.
+  2. If a sponsor's target programs include the team's program type, boost score by 10.
+  3. MANDATORY: Each entry in your response must include "company_name" set to the EXACT company name from that sponsor's entry above. Do NOT copy the company name from a different entry.
+  4. The match_reason for each entry MUST mention that company's EXACT name in the first sentence. Write as if you are speaking about ONLY that one company.
+  5. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace — referencing THAT company by name throughout.
+  6. Return ALL sponsors scoring above 45, sorted by score descending.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -88,6 +88,7 @@ CRITICAL INSTRUCTIONS:
             type: "object",
             properties: {
               sponsor_id: { type: "string" },
+              company_name: { type: "string" },
               match_confidence: { type: "number" },
               match_reason: { type: "string" },
               has_mentor_connection: { type: "boolean" },
@@ -111,12 +112,22 @@ CRITICAL INSTRUCTIONS:
 
   const enriched = matches
     .filter((m) => m.match_confidence > 45 && sponsorMap[m.sponsor_id])
-    .map((m) => ({
-      ...m,
-      match_confidence: Math.min(100, Math.round(m.match_confidence)),
-      has_mentor_connection: mentorMatchedIds.has(m.sponsor_id) || !!m.has_mentor_connection,
-      sponsor: sponsorMap[m.sponsor_id] || {},
-    }));
+    .map((m) => {
+      const sponsor = sponsorMap[m.sponsor_id];
+      const correctName = sponsor.company_name;
+      // If the reason doesn't mention the correct company name, prepend a correction
+      let reason = m.match_reason || "";
+      if (correctName && !reason.toLowerCase().includes(correctName.toLowerCase())) {
+        reason = `${correctName} is a strong match for your team. ${reason}`;
+      }
+      return {
+        ...m,
+        match_reason: reason,
+        match_confidence: Math.min(100, Math.round(m.match_confidence)),
+        has_mentor_connection: mentorMatchedIds.has(m.sponsor_id) || !!m.has_mentor_connection,
+        sponsor,
+      };
+    });
 
   // Guarantee: inject any mentor-matched company the LLM missed or scored too low
   mentorMatchedIds.forEach(id => {
