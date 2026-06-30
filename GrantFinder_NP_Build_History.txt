@@ -1,0 +1,328 @@
+GRANTFINDER NP — FULL BUILD HISTORY
+=====================================
+Prepared for YC Startup School
+Date: June 30, 2026
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRODUCT OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GrantFinder NP is an AI-powered grant and sponsorship matching platform
+designed to help non-profits and FIRST Robotics teams discover high-impact
+funding tailored to their specific mission and requirements.
+
+Core Value Proposition:
+  - Eliminate hours of manual grant research with AI-curated matches
+  - Confidence-ranked funding recommendations (0–100% match score)
+  - Specialized tools for FIRST Robotics teams (FRC, FTC, FLL)
+  - Corporate sponsorship finder with cold outreach guidance
+  - Offline fundraising guide for local business cold calling
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 1 — CORE GRANT MATCHING ENGINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Build the foundational grant discovery and AI matching system.
+
+Entities Created:
+  - Nonprofits: stores org profiles (name, EIN, focus area, budget, location, mission keywords)
+  - FundingOpportunities: grant database (title, provider, type, value, deadline, sectors, robotics flag, URL)
+  - MatchingResults: stores AI match output (search_id, funding_id, confidence score, reason)
+  - SearchHistory: tracks when organizations ran scans
+  - Grants: supplemental grant records
+
+Pages Built:
+  - Dashboard (main page): split-screen layout with org profile form (left) + results panel (right)
+
+Key Features Implemented:
+  - OrgProfileForm: captures nonprofit name, EIN, focus area, budget, location, mission keywords
+  - AI matching via InvokeLLM (GPT-4o-mini → upgraded to gpt_5_mini)
+  - 0–100 confidence score with visual progress bar per match
+  - Results hidden until scan button clicked
+  - Grant results sorted by confidence score descending
+  - GrantMatchCard component with type badges, value display, match reasoning
+  - Application URL links shown only when available
+  - Loading spinner during AI scan
+
+Design Decisions:
+  - Inter font family throughout
+  - Indigo color scheme for main grant finder
+  - Split-screen layout (sidebar form + main results panel)
+  - shadcn/ui + Tailwind CSS + framer-motion animations
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 2 — ROBOTICS TEAM SPECIALIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Make the platform significantly more useful for FIRST Robotics teams.
+
+Changes Made:
+  - Added "FIRST Robotics" as a focus area option in OrgProfileForm
+  - Implemented category-specific eligibility questions that animate based on focus area selection
+  - Added dynamic question sets per category:
+      • Education: grade levels, Title I school status, curriculum alignment
+      • STEM: program type, competition participation, lab access
+      • FIRST Robotics: team number, program (FRC/FTC/FLL), years active, rookie status
+      • Environment: geographic scope, conservation focus
+      • Arts: discipline, community reach
+      • Human Services: population served, service area
+
+AI Prompt Enhancements for Robotics:
+  - Explicitly boosted scores 90–100 for robotics-specific grants:
+      Swyft, Polymaker, Gene Haas Foundation, FIRST in Texas (FiT), FTC/FRC-specific grants
+  - Scored 80–95 for ALL opportunities with accepts_robotics_teams = TRUE
+  - Scored 70–85 for STEM material sponsorships (REV Robotics, AndyMark, Vex, Limelight, PTC/Creo, Autodesk)
+  - Lowered match confidence threshold from 60 to 50 for FIRST Robotics teams
+  - Extra weight for Texas-based grants when team is in Texas
+  - Pre-filter: pulled top 60 most relevant opportunities before sending to LLM to prevent token overflow
+
+Grant Database — Initial Robotics Grants Added:
+  - Swyft Robotics Virtual Kit of Parts Voucher ($50 store credit)
+  - REV Robotics Sponsorship
+  - AndyMark Sponsorship
+  - Limelight Vision Sponsorship
+  - Gene Haas Foundation Grant ($5,000 cash)
+  - FIRST in Texas (FiT) Foundation Grant
+  - Polymaker Filament Sponsorship
+  - PTC/Creo CAD License (free product)
+  - Autodesk Education License (free product)
+  - Texas Instruments STEM Grant
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 3 — EXPANDED GRANT DATABASE (40+ NEW OPPORTUNITIES)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Build a comprehensive, production-quality funding database.
+
+Grants Added (bulk import + manual additions):
+
+  ROBOTICS-SPECIFIC:
+  - SOLIDWORKS Free License – Veteran FIRST Teams (free product, non-rookie only)
+  - WCP (West Coast Products) Team Sponsorship (material, variable value)
+  - FRC Tees Sponsorship ($500 apparel, managed merch store option)
+  - Studica Robotics Grant ($200 store credit, sensors & components)
+  - Swyft Robotics Sponsorship (Discord-gated, in development)
+  - Vex Robotics EDU Discount (EDU pricing)
+  - Limelight Vision Grant (vision processing hardware)
+  - Benevity Community Investment Fund – FIRST ($1,000 cash)
+
+  STEM & EDUCATION:
+  - Google Ad Grants ($10,000/month in ad credits for nonprofits)
+  - Microsoft Nonprofit Grants (Azure credits + software)
+  - Amazon Web Services (AWS) Nonprofit Credits
+  - Comcast NBCUniversal Foundation Grant
+  - National Science Foundation (NSF) STEM Grants
+  - STEM Next Opportunity Fund
+
+  GENERAL NONPROFIT:
+  - Awesome Foundation Grant ($1,000/month, creative projects)
+  - Benevity Community Grant – General STEM ($1,000)
+  - Mazda Foundation Grant (education/environment, near Mazda offices)
+  - Mazda New Organization Team Support (drone competitions only, NOT FIRST Robotics)
+
+  CORPORATE SPONSORSHIP PORTALS:
+  - Boeing Employee Gift Matching
+  - Lockheed Martin STEM Grant
+  - Raytheon Technologies STEM Education Grant
+  - Northrop Grumman Foundation STEM Grant
+  - ExxonMobil Educational Alliance Grant
+  - Shell Oil Foundation Grant
+  - Chevron STEM Education Grant
+
+Database Stats After Phase 3:
+  - 60+ total FundingOpportunities records
+  - Coverage: Cash Grants, Store Credits, Material Sponsorships
+  - Sectors: STEM, FIRST Robotics, Education, Environment, Arts, Human Services
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 4 — COLD CALLING GUIDE (Offline Fundraising)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Help teams raise money from local businesses offline.
+
+New Page: /cold-calling (ColdCallingPage.jsx)
+  - 5-step tactical guide:
+      Step 1: Research — identify local businesses to target
+      Step 2: Prepare your pitch — what to say, what to bring
+      Step 3: Make the call — how to open the conversation
+      Step 4: Handle objections — common pushbacks and responses
+      Step 5: Follow up — email template after the call
+  - Collapsible sample phone script with customizable template
+  - Navigation back to Dashboard
+
+Dashboard Quick Links Banner Added:
+  - "Sponsorship Finder" quick link (purple, left side)
+  - "Cold Calling Guide" quick link (amber, right side)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 5 — SPONSORSHIP FINDER (Corporate Partnership Tool)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Build a dedicated corporate sponsorship matching tool with AI.
+
+New Entity: Sponsorships
+  Fields: company_name, contact_email, contact_phone, contact_person,
+          typical_amount, industry, description, website_url, accepts_robotics,
+          sponsorship_status, target_programs, geographic_focus, community_notes
+
+Status Types (ranked by priority):
+  - Confirmed Sponsor, Open Grant, Email Outreach, Call Required,
+    EDU Discounts, Needs Connection, Untried
+
+New Page: /sponsorship-finder (SponsorshipFinder.jsx)
+  - Purple color scheme (distinct from main grant finder indigo)
+  - Same split-screen layout as Dashboard
+
+New Components:
+  - SponsorshipProfileForm: captures team name, number, program type, location,
+    team size, years active, description, mentor/parent connections
+  - SponsorshipResults: results panel with scanning/empty/no-results states
+  - SponsorshipCard: displays company details, match score, contact info,
+    action buttons (email, call, website)
+
+AI Matching Logic:
+  - Sends all sponsorship records + team profile to GPT (gpt_5_mini)
+  - Status-based scoring priority:
+      Open Grant / Confirmed Sponsor → 85–100
+      Email Outreach → 70–90
+      Call Required → 65–85
+      EDU Discounts → 60–80
+      Needs Connection → 50–70
+      Untried → 55–75
+  - Returns all sponsors scoring above 45
+
+Outreach Ordering Rule:
+  - When phone number is available → ALWAYS recommend calling first
+  - Format: "Call [company] first at their main number, then follow up with email"
+  - When no phone → recommend email outreach
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 6 — MENTOR CONNECTION INTELLIGENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Help teams leverage internal company connections to unlock sponsorships.
+
+Problem Solved:
+  Teams often have mentors or parents who work at large companies
+  (Boeing, Microsoft, Google, etc.) but don't know how to use that
+  connection to unlock corporate matching programs or sponsorships.
+
+Implementation — Frontend Pre-Matching (3 strategies for robustness):
+  Strategy 1: Exact full company name match in mentor text
+  Strategy 2: All significant words present (ignores stop words: Inc, LLC, Corp, etc.)
+  Strategy 3: Any significant word as a whole word (regex boundary match)
+  → mentorMatchedIds set populated before LLM call
+
+LLM Instructions for Mentor Matches:
+  - Score mentor-connected companies 90–100 regardless of status
+  - has_mentor_connection = true
+  - match_reason must include step-by-step internal guidance:
+      1. How to ask the mentor to inquire at their company
+      2. Who to contact internally (Community Relations, HR, CSR team)
+      3. What to say and what to ask for
+      4. Reference any volunteer grant/matching programs
+
+Post-LLM Fallback Guarantee:
+  - If LLM misses a mentor-matched company or scores it too low:
+      → Injected manually at top with confidence 92
+      → Pre-written internal approach guidance included
+  - If LLM included it: boost confidence to max(existing, 90) and set flag
+
+Sorting Logic:
+  - Mentor connections always appear first
+  - Then sorted by confidence score descending
+
+Company Name Validation:
+  - Added company_name field to LLM response schema
+  - Post-processing: if match_reason doesn't mention the correct company name,
+    prepend correction sentence automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 7 — DATA CORRECTIONS & DATABASE REFINEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Ensure all grant and sponsor records have accurate, current information.
+
+FundingOpportunities Corrections:
+  - Mazda New Organization Team Support:
+      Removed FIRST Robotics eligibility (drone competition only)
+      Updated description to clarify NOT for FIRST teams
+  - SOLIDWORKS Free License:
+      Changed value to "Free Product" ($0 numeric value)
+      Confirmed correct application URL
+      Updated description to clarify veteran teams only (non-rookie)
+  - Studica Robotics Grant:
+      Corrected value from $1,000 → $200 store credit
+  - WCP (West Coast Products):
+      Changed value to "Depends" (variable, $0 numeric placeholder)
+      Updated description to reflect variable sponsorship
+  - FRC Tees Sponsorship:
+      Updated benefits: heavily discounted apparel + $25 hoodie credit
+      Added: FRCTees Managed Merch Store program (they run your merch store)
+  - Swyft Robotics Sponsorship:
+      Added Discord link: discord.gg/yk4CMTWUbK
+      Updated description: sponsorship in development, join Discord for updates
+
+Sponsorships Entity Corrections:
+  - Studio: corrected financial value
+  - WCP: updated financial description
+  - FRCtees: updated benefit details
+  - Swift: added Discord link + outreach instructions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECHNICAL ARCHITECTURE SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend Stack:
+  - React 18 + Vite
+  - Tailwind CSS + shadcn/ui components
+  - framer-motion (animations)
+  - lucide-react (icons)
+  - react-router-dom (routing)
+
+Backend (Base44 BaaS):
+  - 6 entities: Nonprofits, FundingOpportunities, MatchingResults,
+    SearchHistory, Grants, Sponsorships
+  - AI: base44.integrations.Core.InvokeLLM (model: gpt_5_mini)
+  - Backend function: googleDrive (spreadsheet import)
+  - Google Drive connector (OAuth, read-only)
+
+Pages:
+  - / → Dashboard (Grant Finder)
+  - /sponsorship-finder → Sponsorship Finder
+  - /cold-calling → Cold Calling Guide
+
+Key Components:
+  - OrgProfileForm (dynamic eligibility questions)
+  - GrantMatchCard (confidence score bar, grant details, apply link)
+  - ResultsPanel (state management: loading/empty/results)
+  - SponsorshipProfileForm (mentor connections field)
+  - SponsorshipCard (call/email/website actions, mentor flag)
+  - SponsorshipResults (state management)
+  - ColdCallingPage (5-step guide + phone script)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRODUCT METRICS (as of June 30, 2026)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Database:
+  - 60+ funding opportunities across 3 types (Cash, Store Credit, Material)
+  - 30+ corporate sponsor records with contact info and outreach status
+  - 6 focus area categories supported (Education, STEM, FIRST Robotics,
+    Environment, Arts, Human Services)
+
+Features Shipped:
+  ✓ AI grant matching with confidence scoring
+  ✓ FIRST Robotics team specialization
+  ✓ Corporate sponsorship finder
+  ✓ Mentor connection intelligence
+  ✓ Cold calling guide with phone script
+  ✓ Application link integration
+  ✓ Google Drive import for grant data
+  ✓ Dynamic eligibility question forms
+  ✓ Outreach ordering (call before email)
+  ✓ Company name validation in AI responses
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF BUILD HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
