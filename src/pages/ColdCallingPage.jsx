@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import CopyButton from "@/components/coldcalling/CopyButton";
 import {
   Phone,
   Mail,
@@ -175,6 +176,9 @@ export default function ColdCallingPage() {
                 </button>
                 {emailOpen && (
                   <div className="px-4 pb-4">
+                    <div className="flex justify-end mb-2">
+                      <CopyButton text={COLD_EMAIL} label="Copy email" />
+                    </div>
                     <pre className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-white rounded-lg border border-indigo-100 p-4 font-body">
                       {COLD_EMAIL}
                     </pre>
@@ -189,22 +193,34 @@ export default function ColdCallingPage() {
             <SectionCard icon={Phone} accent="emerald" number="02" title="Follow-Up Cold Call — 2 Days Later" subtitle="Goal: confirm they saw the email, recap, and lock in a meeting to pitch in person.">
               <div className="text-sm text-slate-600 leading-relaxed space-y-3">
                 <p><strong className="text-slate-700">Opening:</strong></p>
-                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+                <div className="relative">
+                  <div className="absolute top-2 right-2 z-10"><CopyButton text={`"Hi, is this [Company]? Hey, my name is [Your Name] — I sent over an email a few days ago about [Organization Name], our [team / nonprofit]. Did you get a chance to see it?"`} /></div>
+                  <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 pr-24 font-body text-xs text-slate-600">
 {`"Hi, is this [Company]? Hey, my name is [Your Name] — I sent over an email a few days ago about [Organization Name], our [team / nonprofit]. Did you get a chance to see it?"`}
-                </pre>
+                  </pre>
+                </div>
                 <p className="text-xs text-slate-500">If yes: <em>"Great! Just to recap quickly — ..."</em> &nbsp; If no: <em>"No worries, I'll keep it short. Quick recap of what I sent — ..."</em></p>
                 <p><strong className="text-slate-700">The recap (use either way):</strong></p>
-                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+                <div className="relative">
+                  <div className="absolute top-2 right-2 z-10"><CopyButton text={CALL_RECAP} /></div>
+                  <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 pr-24 font-body text-xs text-slate-600">
 {CALL_RECAP}
-                </pre>
+                  </pre>
+                </div>
                 <p><strong className="text-slate-700">The ask:</strong></p>
-                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+                <div className="relative">
+                  <div className="absolute top-2 right-2 z-10"><CopyButton text={`"I know that's a lot to cover over the phone, and I'd love the chance to actually walk you through the full pitch — why this partnership makes sense, what past sponsors have gotten out of it, and how we'd showcase [Company Name] specifically. Would you be open to a quick in-person meeting sometime in the next week or two? I'm happy to come to your office, or if that's easier, we could do a video call instead."`} /></div>
+                  <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 pr-24 font-body text-xs text-slate-600">
 {`"I know that's a lot to cover over the phone, and I'd love the chance to actually walk you through the full pitch — why this partnership makes sense, what past sponsors have gotten out of it, and how we'd showcase [Company Name] specifically. Would you be open to a quick in-person meeting sometime in the next week or two? I'm happy to come to your office, or if that's easier, we could do a video call instead."`}
-                </pre>
+                  </pre>
+                </div>
                 <p><strong className="text-slate-700">Closing:</strong></p>
-                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+                <div className="relative">
+                  <div className="absolute top-2 right-2 z-10"><CopyButton text={`"Perfect — I'll set a meeting and let my team know for [day/time]. Thanks so much, looking forward to it!"`} /></div>
+                  <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 pr-24 font-body text-xs text-slate-600">
 {`"Perfect — I'll set a meeting and let my team know for [day/time]. Thanks so much, looking forward to it!"`}
-                </pre>
+                  </pre>
+                </div>
               </div>
 
               {/* Objection handling */}
@@ -216,7 +232,10 @@ export default function ColdCallingPage() {
                 <div className="flex flex-col gap-2.5">
                   {OBJECTIONS.map((o, i) => (
                     <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
-                      <p className="text-xs font-semibold text-slate-700 mb-1">{o.q}</p>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <p className="text-xs font-semibold text-slate-700">{o.q}</p>
+                        <CopyButton text={o.a} />
+                      </div>
                       <p className="text-xs text-slate-600 leading-relaxed">{o.a}</p>
                     </div>
                   ))}
