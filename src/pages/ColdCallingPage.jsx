@@ -24,28 +24,28 @@ const RESEARCH_TIPS = [
 
 const COLD_EMAIL = `Hi [First Name],
 
-My name is [Your Name], and I'm a [grade level] student organizer of [Hackathon Name], a virtual international hackathon run entirely by high schoolers. We're bringing together 400+ students from 10+ countries to build projects in Ideation, AI, Embedded Systems, Software, App Development, and Data Science over 16 days starting August 2nd.
+My name is [Your Name], and I'm with [Organization Name], a [brief one-line description — e.g. community robotics team / local nonprofit serving youth]. We [what you do and who you impact — e.g. run STEM programs for 40+ students in the Houston area, competing in FIRST Robotics].
 
-I'm reaching out because [Company Name]'s support for [relevant cause — student education, tech innovation, etc.] made me think you'd be a great fit to partner with us.
+I'm reaching out because [Company Name]'s support for [relevant cause — youth education, STEM, local community, etc.] made me think you'd be a great fit to partner with us.
 
 As a sponsor, you'd get:
-- Brand visibility at our opening ceremony in front of 400+ student participants, mentors, and judges
-- Feature placement across our social media channels (Instagram, LinkedIn, etc.), reaching 660+ followers
-- Direct access to a pipeline of motivated, technically skilled students — many actively exploring internships and early career paths
-- Community impact — your support directly funds prizes, platform costs, and resources that make this event possible for students who couldn't otherwise participate
-- Tax-deductible donation — we're a registered 501(c)(3) nonprofit under Hack Club, so your contribution is fully tax-deductible
+- Brand visibility on our team shirts, robot, and at every event we attend
+- Feature placement across our social media channels and website
+- Direct connection to motivated students — many exploring internships and career paths in your industry
+- Community impact — your support directly funds parts, tools, travel, and resources that make this possible for students who couldn't otherwise participate
+- Tax-deductible donation — we're a registered 501(c)(3) nonprofit, so your contribution is fully tax-deductible
 
-This isn't a big-budget corporate event but instead is run by local students, for students. Every dollar would truly go a long way. Sponsorship packages start at just $50, with tiers up to $300 for more visibility. I have also attached our Sponsorship Packet for more info.
+We're a community-driven program, and every dollar truly goes a long way. Sponsorship packages start at just $50, with tiers up to $300+ for more visibility. I've attached our Sponsorship Packet for more info.
 
 Would you be open to a quick 10-minute call this week to talk through how we could work together? I'll follow up in a few days if I don't hear back, but feel free to reply directly anytime.
 
 Thanks so much for considering it,
 
 [Your Name]
-[Your Role], [Hackathon Name]
+[Your Role], [Organization Name]
 [Phone] | [Email] | [Website/Socials]`;
 
-const CALL_RECAP = `"I'm a [grade level] student helping run [Hackathon Name], a virtual hackathon bringing together 400+ students from 10+ countries to build unique new projects over 16 days. We're looking for a few sponsors to help cover costs like prizes and platform fees. In return, sponsors get a shoutout at our opening ceremony in front of all participants, plus features across our social media. We're also a registered 501(c)(3) nonprofit under Hack Club, so any donation is fully tax-deductible."`;
+const CALL_RECAP = `"I'm with [Organization Name], a [brief description — e.g. community robotics team / local youth nonprofit] working with students in [your area]. We're looking for a few sponsors to help cover costs like parts, tools, and travel. In return, sponsors get their logo on our team shirts and robot at every event, plus features across our social media. We're also a registered 501(c)(3) nonprofit, so any donation is fully tax-deductible."`;
 
 const OBJECTIONS = [
   {
@@ -163,7 +163,7 @@ export default function ColdCallingPage() {
             <SectionCard icon={Mail} accent="indigo" number="01" title="Cold Email First" subtitle="Send this 2 days before you call. Brief, impact-led, tax-deductible, low ask.">
               <p className="text-sm text-slate-600 leading-relaxed mb-3">
                 Keep it short. Explain who you are, what the event is, why this company fits, what sponsors get, and that donations are tax-deductible (501(c)(3) under Hack Club).
-                Attach your Sponsorship Packet. Always end with a low-friction ask: a 10-minute call this week.
+                Attach your Sponsorship Packet. Always end with a low-friction ask: a 10-minute call this week. The script below is a generic template — swap the bracketed fields for your own organization.
               </p>
               <div className="rounded-xl border border-indigo-100 bg-indigo-50">
                 <button onClick={() => setEmailOpen(!emailOpen)} className="w-full flex items-center justify-between px-4 py-3">
@@ -190,7 +190,7 @@ export default function ColdCallingPage() {
               <div className="text-sm text-slate-600 leading-relaxed space-y-3">
                 <p><strong className="text-slate-700">Opening:</strong></p>
                 <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
-{`"Hi, is this [Company]? Hey, my name is [Your Name] — I sent over an email a few days ago about [Hackathon Name], the student-run hackathon. Did you get a chance to see it?"`}
+{`"Hi, is this [Company]? Hey, my name is [Your Name] — I sent over an email a few days ago about [Organization Name], our [team / nonprofit]. Did you get a chance to see it?"`}
                 </pre>
                 <p className="text-xs text-slate-500">If yes: <em>"Great! Just to recap quickly — ..."</em> &nbsp; If no: <em>"No worries, I'll keep it short. Quick recap of what I sent — ..."</em></p>
                 <p><strong className="text-slate-700">The recap (use either way):</strong></p>
