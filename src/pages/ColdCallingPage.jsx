@@ -45,7 +45,7 @@ Thanks so much for considering it,
 [Your Role], [Hackathon Name]
 [Phone] | [Email] | [Website/Socials]`;
 
-const CALL_RECAP = `"I'm a [grade level] student helping run Reverie Hacks, a virtual hackathon bringing together 400+ students from 10+ countries to build unique new projects over 16 days. We're looking for a few sponsors to help cover costs like prizes and platform fees. In return, sponsors get a shoutout at our opening ceremony in front of all participants, plus features across our social media. We're also a registered 501(c)(3) nonprofit under Hack Club, so any donation is fully tax-deductible."`;
+const CALL_RECAP = `"I'm a [grade level] student helping run [Hackathon Name], a virtual hackathon bringing together 400+ students from 10+ countries to build unique new projects over 16 days. We're looking for a few sponsors to help cover costs like prizes and platform fees. In return, sponsors get a shoutout at our opening ceremony in front of all participants, plus features across our social media. We're also a registered 501(c)(3) nonprofit under Hack Club, so any donation is fully tax-deductible."`;
 
 const OBJECTIONS = [
   {
@@ -62,7 +62,7 @@ const OBJECTIONS = [
   },
   {
     q: '"Not interested"',
-    a: '"No worries at all, I appreciate you taking the call. If anything changes, our info is always on reveriehacks.org. Thanks for your time!"',
+    a: '"No worries at all, I appreciate you taking the call. If anything changes, our info is always on our website. Thanks for your time!"',
   },
   {
     q: '"How much are you looking for?"',
