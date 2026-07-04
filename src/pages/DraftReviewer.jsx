@@ -43,8 +43,11 @@ export default function DraftReviewer() {
   useEffect(() => {
     (async () => {
       try {
-        const opps = await base44.entities.FundingOpportunities.list();
-        const names = Array.from(new Set(opps.map((o) => o.provider_name).filter(Boolean))).slice(0, 30);
+        // Pull a large batch so all funders (incl. Gene Haas) are covered, then keep only
+        // those that actually display a website/application_url on the grant finder.
+        const opps = await base44.entities.FundingOpportunities.list("-created_date", 500);
+        const withUrl = opps.filter((o) => o.application_url);
+        const names = Array.from(new Set(withUrl.map((o) => o.provider_name).filter(Boolean))).sort();
         setFunderSuggestions(names);
       } catch {
         setFunderSuggestions([]);
