@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Phone, Handshake } from "lucide-react";
+import { Phone, Handshake, ClipboardCheck } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
@@ -234,6 +234,18 @@ export default function Dashboard() {
           <div className="flex-1">
             <p className="text-sm font-semibold text-slate-800">Effective Fundraising Strategy</p>
             <p className="text-xs text-slate-500">Raise a confirmed $100k+ — used by nonprofits across 5+ states →</p>
+          </div>
+        </Link>
+        <Link
+          to="/draft-reviewer"
+          className="flex-1 flex items-center gap-3 rounded-xl bg-indigo-50 border border-indigo-200 px-5 py-3 hover:bg-indigo-100 transition-colors group"
+        >
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center transition-colors">
+            <ClipboardCheck size={15} className="text-indigo-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-800">Draft Reviewer</p>
+            <p className="text-xs text-slate-500">AI roleplays as your target funder & critiques your draft →</p>
           </div>
         </Link>
       </div>

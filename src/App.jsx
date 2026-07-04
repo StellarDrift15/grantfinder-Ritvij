@@ -9,6 +9,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Dashboard from "./pages/Dashboard";
 import ColdCallingPage from "./pages/ColdCallingPage";
 import SponsorshipFinder from "./pages/SponsorshipFinder";
+import DraftReviewer from "./pages/DraftReviewer";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/cold-calling" element={<ColdCallingPage />} />
       <Route path="/sponsorship-finder" element={<SponsorshipFinder />} />
+      <Route path="/draft-reviewer" element={<DraftReviewer />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
