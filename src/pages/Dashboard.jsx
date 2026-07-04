@@ -232,8 +232,8 @@ export default function Dashboard() {
             <Phone size={15} className="text-amber-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-800">Cold Calling Guide</p>
-            <p className="text-xs text-slate-500">5-step guide to raising money from local businesses →</p>
+            <p className="text-sm font-semibold text-slate-800">Effective Fundraising Strategy</p>
+            <p className="text-xs text-slate-500">Raise a confirmed $100k+ — used by nonprofits across 5+ states →</p>
           </div>
         </Link>
       </div>
