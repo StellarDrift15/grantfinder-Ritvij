@@ -1,78 +1,112 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Phone, CheckCircle2, AlertCircle, MessageSquare, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  ArrowLeft,
+  TrendingUp,
+  Handshake,
+  Lightbulb,
+  FileText,
+  Building2,
+} from "lucide-react";
 
-const STEPS = [
+const RESEARCH_TIPS = [
+  "Target businesses that benefit from your community (restaurants, hardware stores, local banks).",
+  "Look for businesses that have sponsored local events — they're already predisposed to giving.",
+  "Find the owner's or manager's name before you call; avoid asking for 'whoever handles donations.'",
+];
+
+const COLD_EMAIL = `Hi [First Name],
+
+My name is [Your Name], and I'm a [grade level] student organizer of [Hackathon Name], a virtual international hackathon run entirely by high schoolers. We're bringing together 400+ students from 10+ countries to build projects in Ideation, AI, Embedded Systems, Software, App Development, and Data Science over 16 days starting August 2nd.
+
+I'm reaching out because [Company Name]'s support for [relevant cause — student education, tech innovation, etc.] made me think you'd be a great fit to partner with us.
+
+As a sponsor, you'd get:
+- Brand visibility at our opening ceremony in front of 400+ student participants, mentors, and judges
+- Feature placement across our social media channels (Instagram, LinkedIn, etc.), reaching 660+ followers
+- Direct access to a pipeline of motivated, technically skilled students — many actively exploring internships and early career paths
+- Community impact — your support directly funds prizes, platform costs, and resources that make this event possible for students who couldn't otherwise participate
+- Tax-deductible donation — we're a registered 501(c)(3) nonprofit under Hack Club, so your contribution is fully tax-deductible
+
+This isn't a big-budget corporate event but instead is run by local students, for students. Every dollar would truly go a long way. Sponsorship packages start at just $50, with tiers up to $300 for more visibility. I have also attached our Sponsorship Packet for more info.
+
+Would you be open to a quick 10-minute call this week to talk through how we could work together? I'll follow up in a few days if I don't hear back, but feel free to reply directly anytime.
+
+Thanks so much for considering it,
+
+[Your Name]
+[Your Role], [Hackathon Name]
+[Phone] | [Email] | [Website/Socials]`;
+
+const CALL_RECAP = `"I'm a [grade level] student helping run Reverie Hacks, a virtual hackathon bringing together 400+ students from 10+ countries to build unique new projects over 16 days. We're looking for a few sponsors to help cover costs like prizes and platform fees. In return, sponsors get a shoutout at our opening ceremony in front of all participants, plus features across our social media. We're also a registered 501(c)(3) nonprofit under Hack Club, so any donation is fully tax-deductible."`;
+
+const OBJECTIONS = [
   {
-    number: "01",
-    title: "Research Local Businesses First",
-    tips: [
-      "Target businesses that benefit from your community (restaurants, hardware stores, local banks).",
-      "Look for businesses that have sponsored local events — they're already predisposed to giving.",
-      "Find the owner's or manager's name before you call; avoid asking for 'whoever handles donations.'",
-    ],
+    q: '"Sure, let\'s set something up"',
+    a: '"Awesome — what does your schedule look like next week? I can work around whatever\'s easiest for you." Lock in a specific day/time before hanging up if at all possible.',
   },
   {
-    number: "02",
-    title: "Craft Your 30-Second Pitch",
-    tips: [
-      "Lead with your impact: \"We help 40 local students learn robotics and compete nationally.\"",
-      "State the ask clearly: \"We're looking for a $500 sponsorship to cover registration fees.\"",
-      "Offer something in return: logo on banners, mention at events, social media shoutout.",
-    ],
+    q: '"I don\'t think a meeting is necessary, just send info"',
+    a: '"Totally understand — I\'ll send over a sponsorship one-pager with all the details, including our 501(c)(3) info for the tax write-off. If after reading it you have questions or want to talk through specifics, I\'d still love to grab even 15 minutes in person — sometimes it\'s easier to show you what past events looked like."',
   },
   {
-    number: "03",
-    title: "Make the Call",
-    tips: [
-      "Call Tuesday–Thursday between 10am–12pm or 2pm–4pm — avoid Mondays and Fridays.",
-      "If you get a gatekeeper, say: \"I'd like to speak with [Name] about a local sponsorship opportunity.\"",
-      "Don't read from a script — be natural, friendly, and specific about your team/organization.",
-    ],
+    q: '"We don\'t have budget right now"',
+    a: '"That makes sense — would in-kind support work instead, like product credits or mentor volunteers? Either way, I\'d still love to sit down and explain the impact a partnership could have, even if it\'s something to consider for next time. Worst case, you get to meet the team behind it."',
   },
   {
-    number: "04",
-    title: "Handle Objections",
-    tips: [
-      "\"We don't do donations\" → \"This is a sponsorship — your logo appears on our team materials.\"",
-      "\"Send us an email\" → Ask for the exact email and the person's name, then follow up within 24 hours.",
-      "\"We already gave this year\" → \"Would it be okay to follow up in January for next year's budget?\"",
-    ],
+    q: '"Not interested"',
+    a: '"No worries at all, I appreciate you taking the call. If anything changes, our info is always on reveriehacks.org. Thanks for your time!"',
   },
   {
-    number: "05",
-    title: "Follow Up & Build the Relationship",
-    tips: [
-      "Send a thank-you email or handwritten note within 48 hours of any conversation.",
-      "Provide a photo or update after the event — sponsors love seeing their impact.",
-      "Set a calendar reminder to reconnect 3 months before next year's season starts.",
-    ],
+    q: '"How much are you looking for?"',
+    a: '"Our tiers start at 50 dollars and go up to 300 dollars. I\'d love to walk through the breakdown in person so I can explain exactly what each tier gets you. Does meeting sometime next week work?"',
+  },
+  {
+    q: '"Are you actually a registered nonprofit?"',
+    a: '"Yep — we\'re fiscally sponsored by Hack Club, which is a registered 501(c)(3). I\'ll bring their EIN and documentation with me to the meeting, or send it ahead of time if that\'s helpful."',
   },
 ];
 
-const SCRIPT = `"Hi, may I speak with [Owner/Manager Name]?
-
-My name is [Your Name] and I'm with [Organization Name] — we're a local [robotics team / nonprofit] based right here in [City].
-
-We serve [X] students/community members and we're preparing for [event/season/program].
-
-We're reaching out to a few local businesses about sponsorship opportunities — it's a great way to show your support for the community and get your name in front of [audience].
-
-We're looking for sponsors at the $[amount] level, which would cover [specific cost]. In return, we'd feature your logo on [banners / shirts / website].
-
-Would that be something you'd be open to discussing?"`;
+function SectionCard({ icon: Icon, accent, number, title, subtitle, children }) {
+  const accentMap = {
+    indigo: { ring: "bg-indigo-100", text: "text-indigo-600", border: "border-indigo-100", bg: "bg-indigo-50", chip: "bg-indigo-50 text-indigo-600" },
+    emerald: { ring: "bg-emerald-100", text: "text-emerald-600", border: "border-emerald-100", bg: "bg-emerald-50", chip: "bg-emerald-50 text-emerald-600" },
+  };
+  const c = accentMap[accent];
+  return (
+    <div className={`rounded-2xl border ${c.border} bg-white p-6 shadow-sm`}>
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`w-10 h-10 rounded-xl ${c.ring} flex items-center justify-center`}>
+          <Icon size={18} className={c.text} />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            {number && <span className={`text-xs font-bold font-mono ${c.chip} rounded-md px-2 py-0.5`}>{number}</span>}
+            <h3 className="text-base font-semibold text-slate-800">{title}</h3>
+          </div>
+          {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function ColdCallingPage() {
-  const [scriptOpen, setScriptOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [callOpen, setCallOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-      {/* Top Nav */}
       <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 gap-3 shadow-sm">
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-        >
+        <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
           <ArrowLeft size={16} />
           Back to Grant Finder
         </Link>
@@ -83,61 +117,169 @@ export default function ColdCallingPage() {
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-              <Phone size={18} className="text-amber-600" />
+              <TrendingUp size={18} className="text-amber-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Cold Calling Local Businesses</h1>
-              <p className="text-sm text-slate-500">A practical guide to raising money directly from your community</p>
+              <h1 className="text-xl font-bold text-slate-800">Effective Fundraising Strategy</h1>
+              <p className="text-sm text-slate-500">A proven email-then-call playbook for raising money from local &amp; corporate sponsors</p>
             </div>
           </div>
 
-          {/* Callout */}
-          <div className="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 my-6">
+          {/* Proven Results Banner */}
+          <div className="flex items-stretch gap-3 my-6">
+            <div className="flex-1 flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
+              <TrendingUp size={16} className="text-emerald-500 shrink-0" />
+              <p className="text-sm text-emerald-800 leading-relaxed font-medium">
+                This playbook was used to raise over $60,000 from sponsors across 5+ states — with an 80% success rate on contacted companies.
+              </p>
+            </div>
+          </div>
+
+          {/* Strategy Overview */}
+          <div className="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 mb-8">
             <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
             <p className="text-sm text-amber-800 leading-relaxed">
-              Local businesses often give $250–$2,000 to community organizations — and a 15-minute phone call can close it faster than a 6-month grant cycle. Many robotics teams and nonprofits raise 30–50% of their budget this way.
+              The winning sequence is simple: <strong>send a brief cold email first</strong>, then <strong>follow up with a phone call ~2 days later</strong>.
+              Email warms them up and gives them context; the call closes the meeting where the real pitch happens. Lead with impact, your 501(c)(3) tax-deductible status, and small tiered asks ($50–$300).
             </p>
           </div>
 
-          {/* Steps */}
-          <div className="flex flex-col gap-5 mb-8">
-            {STEPS.map((step) => (
-              <div key={step.number} className="rounded-xl border border-slate-200 p-5 bg-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-sm font-bold text-indigo-500 font-mono bg-indigo-50 rounded-lg px-2.5 py-1">{step.number}</span>
-                  <h3 className="text-base font-semibold text-slate-800">{step.title}</h3>
-                </div>
-                <ul className="flex flex-col gap-2.5 ml-1">
-                  {step.tips.map((tip, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
-                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-600 leading-relaxed">{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          {/* Step 1: Research */}
+          <div className="mb-5">
+            <SectionCard icon={Building2} accent="indigo" number="00" title="Research Before You Reach Out" subtitle="Do this before sending a single email">
+              <ul className="flex flex-col gap-2.5 ml-1">
+                {RESEARCH_TIPS.map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-600 leading-relaxed">{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>
           </div>
 
-          {/* Sample Script */}
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50">
-            <button
-              onClick={() => setScriptOpen(!scriptOpen)}
-              className="w-full flex items-center justify-between px-5 py-4"
-            >
-              <div className="flex items-center gap-2.5">
-                <MessageSquare size={16} className="text-indigo-500" />
-                <span className="text-sm font-semibold text-indigo-700">Sample Phone Script</span>
+          {/* Step 2: Cold Email First */}
+          <div className="mb-5">
+            <SectionCard icon={Mail} accent="indigo" number="01" title="Cold Email First" subtitle="Send this 2 days before you call. Brief, impact-led, tax-deductible, low ask.">
+              <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                Keep it short. Explain who you are, what the event is, why this company fits, what sponsors get, and that donations are tax-deductible (501(c)(3) under Hack Club).
+                Attach your Sponsorship Packet. Always end with a low-friction ask: a 10-minute call this week.
+              </p>
+              <div className="rounded-xl border border-indigo-100 bg-indigo-50">
+                <button onClick={() => setEmailOpen(!emailOpen)} className="w-full flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={15} className="text-indigo-500" />
+                    <span className="text-sm font-semibold text-indigo-700">Cold Email Script</span>
+                  </div>
+                  {emailOpen ? <ChevronUp size={15} className="text-indigo-400" /> : <ChevronDown size={15} className="text-indigo-400" />}
+                </button>
+                {emailOpen && (
+                  <div className="px-4 pb-4">
+                    <pre className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-white rounded-lg border border-indigo-100 p-4 font-body">
+                      {COLD_EMAIL}
+                    </pre>
+                  </div>
+                )}
               </div>
-              {scriptOpen ? <ChevronUp size={16} className="text-indigo-400" /> : <ChevronDown size={16} className="text-indigo-400" />}
-            </button>
-            {scriptOpen && (
-              <div className="px-5 pb-5">
-                <pre className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-white rounded-lg border border-indigo-100 p-5 font-body">
-                  {SCRIPT}
+            </SectionCard>
+          </div>
+
+          {/* Step 3: Follow-Up Cold Call */}
+          <div className="mb-5">
+            <SectionCard icon={Phone} accent="emerald" number="02" title="Follow-Up Cold Call — 2 Days Later" subtitle="Goal: confirm they saw the email, recap, and lock in a meeting to pitch in person.">
+              <div className="text-sm text-slate-600 leading-relaxed space-y-3">
+                <p><strong className="text-slate-700">Opening:</strong></p>
+                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+{`"Hi, is this [Company]? Hey, my name is [Your Name] — I sent over an email a few days ago about [Hackathon Name], the student-run hackathon. Did you get a chance to see it?"`}
+                </pre>
+                <p className="text-xs text-slate-500">If yes: <em>"Great! Just to recap quickly — ..."</em> &nbsp; If no: <em>"No worries, I'll keep it short. Quick recap of what I sent — ..."</em></p>
+                <p><strong className="text-slate-700">The recap (use either way):</strong></p>
+                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+{CALL_RECAP}
+                </pre>
+                <p><strong className="text-slate-700">The ask:</strong></p>
+                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+{`"I know that's a lot to cover over the phone, and I'd love the chance to actually walk you through the full pitch — why this partnership makes sense, what past sponsors have gotten out of it, and how we'd showcase [Company Name] specifically. Would you be open to a quick in-person meeting sometime in the next week or two? I'm happy to come to your office, or if that's easier, we could do a video call instead."`}
+                </pre>
+                <p><strong className="text-slate-700">Closing:</strong></p>
+                <pre className="whitespace-pre-wrap bg-slate-50 rounded-lg border border-slate-200 p-3 font-body text-xs text-slate-600">
+{`"Perfect — I'll set a meeting and let my team know for [day/time]. Thanks so much, looking forward to it!"`}
                 </pre>
               </div>
-            )}
+
+              {/* Objection handling */}
+              <div className="mt-5">
+                <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                  <MessageSquare size={14} className="text-emerald-500" />
+                  Handling Common Responses
+                </h4>
+                <div className="flex flex-col gap-2.5">
+                  {OBJECTIONS.map((o, i) => (
+                    <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs font-semibold text-slate-700 mb-1">{o.q}</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">{o.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Negotiation: In-kind support */}
+          <div className="mb-5">
+            <SectionCard icon={Handshake} accent="emerald" number="03" title="Negotiate In-Kind When Cash Falls Through" subtitle="If they can't write a check, upgrade to higher product value instead.">
+              <div className="text-sm text-slate-600 leading-relaxed space-y-3">
+                <p>
+                  When a company won't commit financially, <strong>don't walk away</strong> — pivot to in-kind support.
+                  Companies are far more willing to give <strong>products, store credit, software licenses, or mentor time</strong> than cash,
+                  and these assets are often worth <strong>far more</strong> than the sponsorship dollar you were asking for.
+                </p>
+                <ul className="flex flex-col gap-2.5 ml-1">
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Ask for higher product worth</strong> — if a $50 tier is the cash ask, request $200+ in product/credit of equivalent marketing value.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Store credit &amp; licenses</strong> — robotics teams can leverage tooling credits (SOLIDWORKS, Autodesk, Vex, AndyMark) that directly cut season costs.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Mentor volunteers</strong> — engineer time is worth its weight in gold; one mentor = hundreds of hours of technical guidance.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Frame it as win-win</strong> — "We can't do cash this year, but could we do $500 in product credit? You'd still get all the same brand visibility."</span>
+                  </li>
+                </ul>
+                <div className="flex items-start gap-2.5 rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2.5">
+                  <Lightbulb size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-emerald-800 leading-relaxed">
+                    In-kind donations are still tax-deductible at fair market value under your 501(c)(3). Always get the donation documented — the company writes off the retail value, not the cost to produce.
+                  </p>
+                </div>
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Step 5: Follow Up & Build Relationship */}
+          <div className="mb-5">
+            <SectionCard icon={FileText} accent="indigo" number="04" title="Follow Up &amp; Build the Relationship" subtitle="The money isn't the end — it's the start of a multi-year partner.">
+              <ul className="flex flex-col gap-2.5 ml-1">
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-600 leading-relaxed">Send a thank-you email or handwritten note within 48 hours of any conversation.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-600 leading-relaxed">Provide a photo or update after the event — sponsors love seeing their impact.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-600 leading-relaxed">Set a calendar reminder to reconnect 3 months before next year's season starts.</span>
+                </li>
+              </ul>
+            </SectionCard>
           </div>
         </div>
       </div>
