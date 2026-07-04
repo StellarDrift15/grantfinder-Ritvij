@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Calendar, DollarSign, Sparkles, Building, ExternalLink } from "lucide-react";
+import { Trophy, Calendar, DollarSign, Sparkles, Building, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 function ConfidenceBadge({ score }) {
   const isGreen = score >= 80;
@@ -50,6 +52,25 @@ const TYPE_LABELS = {
 
 export default function GrantMatchCard({ result, index }) {
   const opportunity = result.opportunity || {};
+  const [feedback, setFeedback] = useState(null);
+  const [saved, setSaved] = useState(false);
+
+  const handleFeedback = async (value) => {
+    const next = feedback === value ? null : value;
+    setFeedback(next);
+    setSaved(!!next);
+    if (next) {
+      try {
+        await base44.entities.MatchFeedback.create({
+          funding_id: result.funding_id || opportunity.id || "",
+          search_id: result.search_id || "",
+          feedback: next,
+        });
+      } catch (e) {
+        console.error("Feedback save failed", e);
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -116,6 +137,34 @@ export default function GrantMatchCard({ result, index }) {
           <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">Why You Match</span>
         </div>
         <p className="text-sm text-slate-700 leading-relaxed">{result.match_reason || "No explanation provided."}</p>
+      </div>
+
+      {/* Feedback row */}
+      <div className="flex items-center gap-2 mt-3">
+        <span className="text-xs text-slate-400">Was this relevant?</span>
+        <button
+          type="button"
+          onClick={() => handleFeedback("up")}
+          className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+            feedback === "up"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+              : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+          }`}
+        >
+          <ThumbsUp size={13} /> Yes
+        </button>
+        <button
+          type="button"
+          onClick={() => handleFeedback("down")}
+          className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+            feedback === "down"
+              ? "bg-rose-50 border-rose-200 text-rose-700"
+              : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+          }`}
+        >
+          <ThumbsDown size={13} /> No
+        </button>
+        {saved && <span className="text-xs text-emerald-500">Thanks — saved!</span>}
       </div>
 
       {/* Bottom row: sectors + apply link */}

@@ -1,0 +1,26 @@
+{
+  "name": "MatchFeedback",
+  "type": "object",
+  "properties": {
+    "funding_id": {
+      "type": "string"
+    },
+    "search_id": {
+      "type": "string"
+    },
+    "feedback": {
+      "type": "string",
+      "enum": [
+        "up",
+        "down"
+      ]
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "funding_id",
+    "feedback"
+  ]
+}
