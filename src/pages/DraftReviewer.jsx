@@ -11,6 +11,9 @@ import {
   Lightbulb,
   Target,
   RefreshCw,
+  Globe,
+  Info,
+  PencilLine,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -40,6 +43,12 @@ export default function DraftReviewer() {
   const [hasReviewed, setHasReviewed] = useState(false);
   const [error, setError] = useState(null);
 
+  // "known" = pick from grant database; "other" = manually enter grant name + website + info
+  const [funderMode, setFunderMode] = useState("known");
+  const [customName, setCustomName] = useState("");
+  const [customWebsite, setCustomWebsite] = useState("");
+  const [customInfo, setCustomInfo] = useState("");
+
   useEffect(() => {
     (async () => {
       try {
@@ -57,8 +66,14 @@ export default function DraftReviewer() {
 
   const handleReview = async (e) => {
     e.preventDefault();
-    if (!draft.trim() || !funderName.trim()) {
-      setError("Please paste your draft text and enter the target funder's name.");
+    const displayName =
+      funderMode === "other" ? customName.trim() : funderName.trim();
+    if (!draft.trim() || !displayName) {
+      setError(
+        funderMode === "other"
+          ? "Please paste your draft and enter the grant name."
+          : "Please paste your draft text and enter the target funder's name."
+      );
       return;
     }
     setError(null);
@@ -67,9 +82,24 @@ export default function DraftReviewer() {
     setReview(null);
 
     try {
-      const prompt = `You are roleplaying as the ${funderName} grant review committee — the actual decision-makers who read applications and decide what gets funded. You know this funder's real-world priorities, preferences, and red flags.
+      // Build the funder context the AI should roleplay as.
+      let funderContext;
+      if (funderMode === "other") {
+        const websiteLine = customWebsite.trim() ? `\nFunder website (use this as the source of truth for their priorities): ${customWebsite.trim()}` : "";
+        const infoLine = customInfo.trim() ? `\nAdditional info about this grant/funder provided by the applicant:\n"""\n${customInfo.trim()}\n"""` : "";
+        funderContext = `${displayName}${websiteLine}${infoLine}`;
+      } else {
+        funderContext = displayName;
+      }
 
-A nonprofit applicant has pasted the draft of the text they plan to submit to ${funderName}. Your job is to critique it the way the real review committee would, BEFORE they submit it.
+      const prompt = `You are roleplaying as the ${displayName} grant review committee — the actual decision-makers who read applications and decide what gets funded. You know this funder's real-world priorities, preferences, and red flags.
+
+${funderMode === "other" ? `Because the applicant entered this funder manually, rely PRIMARILY on the website and additional info below to determine ${displayName}'s priorities. If a website URL is given, treat it as the authoritative source — reason about what kind of funder runs that site and what they likely fund. Use the additional info as direct evidence of their criteria. Only fall back on general knowledge if the provided info is thin, and say so explicitly in the confidence note.
+
+FUNDER PROFILE:
+${funderContext}` : `You know this funder's real-world priorities, preferences, and red flags.`}
+
+A nonprofit applicant has pasted the draft of the text they plan to submit to ${displayName}. Your job is to critique it the way the real review committee would, BEFORE they submit it.
 
 DRAFT TO REVIEW:
 """
@@ -77,12 +107,12 @@ ${draft}
 """
 
 Review instructions:
-1. alignment (0-100 score): How well does this draft align with what ${funderName} actually funds? Base this on ${funderName}'s known priorities (geographic focus, cause areas, population served, typical grant size, volunteer-engagement emphasis, etc.). If you're unsure of a specific priority, say so rather than inventing one.
+1. alignment (0-100 score): How well does this draft align with what ${displayName} actually funds? Base this on ${displayName}'s known priorities (geographic focus, cause areas, population served, typical grant size, volunteer-engagement emphasis, etc.)${funderMode === "other" ? " and the website/info the applicant provided" : ""}. If you're unsure of a specific priority, say so rather than inventing one.
 2. strengths: 2-4 bullet points of what's working in the draft.
-3. gaps: 2-4 bullet points of what's missing or weak — specific to ${funderName}'s known review criteria.
-4. suggestions: 3-5 concrete, actionable rewrite suggestions. Quote the exact phrase from the draft when relevant and show a stronger alternative. Each suggestion should reference ${funderName} by name.
+3. gaps: 2-4 bullet points of what's missing or weak — specific to ${displayName}'s known review criteria.
+4. suggestions: 3-5 concrete, actionable rewrite suggestions. Quote the exact phrase from the draft when relevant and show a stronger alternative. Each suggestion should reference ${displayName} by name.
 5. overallVerdict: One honest paragraph (3-5 sentences) — would this draft get funded as-is? What's the single most important change before submitting?
-6. confidenceNote: One sentence on how confident you are in your knowledge of ${funderName}'s actual priorities, and what the applicant should verify on the funder's official guidelines page.
+6. confidenceNote: One sentence on how confident you are in your knowledge of ${displayName}'s actual priorities, and what the applicant should verify on the funder's official guidelines page.
 
 Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, not praise.`;
 
@@ -120,6 +150,9 @@ Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, 
     setError(null);
   };
 
+  const displayName =
+    funderMode === "other" ? customName.trim() : funderName.trim();
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
       <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 gap-3 shadow-sm">
@@ -153,24 +186,86 @@ Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, 
             </div>
 
             <form onSubmit={handleReview} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Target Funder <span className="text-indigo-500">*</span>
-                </label>
-                <input
-                  className={inputBase}
-                  list="funder-suggestions"
-                  value={funderName}
-                  onChange={(e) => setFunderName(e.target.value)}
-                  placeholder="e.g. Walmart Community Grant, Gene Haas Foundation, Google Ad Grants"
-                />
-                <datalist id="funder-suggestions">
-                  {funderSuggestions.map((n) => (
-                    <option key={n} value={n} />
-                  ))}
-                </datalist>
-                <p className="text-xs text-slate-400">Type the funder's name — suggestions from your grant database appear below.</p>
+              {/* Mode toggle */}
+              <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setFunderMode("known")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                    funderMode === "known" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  <Target size={12} /> From Grant Database
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFunderMode("other")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                    funderMode === "other" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  <PencilLine size={12} /> Other (Enter Manually)
+                </button>
               </div>
+
+              {funderMode === "known" ? (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Target Funder <span className="text-indigo-500">*</span>
+                  </label>
+                  <input
+                    className={inputBase}
+                    list="funder-suggestions"
+                    value={funderName}
+                    onChange={(e) => setFunderName(e.target.value)}
+                    placeholder="e.g. Walmart Community Grant, Gene Haas Foundation, Google Ad Grants"
+                  />
+                  <datalist id="funder-suggestions">
+                    {funderSuggestions.map((n) => (
+                      <option key={n} value={n} />
+                    ))}
+                  </datalist>
+                  <p className="text-xs text-slate-400">Type the funder's name — suggestions from your grant database appear below.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 rounded-2xl bg-indigo-50 border border-indigo-100 p-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      Grant / Funder Name <span className="text-indigo-500">*</span>
+                    </label>
+                    <input
+                      className={inputBase}
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      placeholder="e.g. Acme Local STEM Grant"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <Globe size={11} /> Grant Website
+                    </label>
+                    <input
+                      className={inputBase}
+                      type="url"
+                      value={customWebsite}
+                      onChange={(e) => setCustomWebsite(e.target.value)}
+                      placeholder="https://example.org/grant-program"
+                    />
+                    <p className="text-xs text-slate-400">The AI uses this URL to reason about what the funder actually funds.</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <Info size={11} /> About This Grant
+                    </label>
+                    <textarea
+                      className={inputBase + " resize-none min-h-[80px]"}
+                      value={customInfo}
+                      onChange={(e) => setCustomInfo(e.target.value)}
+                      placeholder="Paste anything you know: eligibility, award size, focus areas, geographic limits, deadlines, review criteria…"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -196,7 +291,7 @@ Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, 
                   className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 shadow-md shadow-indigo-200"
                 >
                   {reviewing ? (
-                    <><Loader2 size={16} className="animate-spin" /> Reviewing as {funderName || "funder"}…</>
+                    <><Loader2 size={16} className="animate-spin" /> Reviewing as {displayName || "funder"}…</>
                   ) : (
                     <><Sparkles size={16} /> Review My Draft</>
                   )}
@@ -228,7 +323,7 @@ Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, 
               <div className="flex flex-col items-center justify-center py-24 gap-3">
                 <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
                 <p className="text-sm text-slate-500">
-                  Reviewing your draft as the {funderName || "funder"} review committee…
+                  Reviewing your draft as the {displayName || "funder"} review committee…
                 </p>
               </div>
             )}
@@ -262,7 +357,7 @@ Be constructive but honest. Don't sugarcoat. The applicant wants real feedback, 
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Target size={16} className="text-indigo-500" />
-                      <h3 className="text-sm font-semibold text-slate-700">Alignment with {funderName}</h3>
+                      <h3 className="text-sm font-semibold text-slate-700">Alignment with {displayName}</h3>
                     </div>
                     <span className={`text-xs font-bold rounded-md px-2.5 py-1 ${accentMap.indigo.chip}`}>
                       {Math.round(review.alignment)}/100
