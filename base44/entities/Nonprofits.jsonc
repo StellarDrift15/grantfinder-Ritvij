@@ -9,15 +9,22 @@
       "type": "string"
     },
     "focus_area": {
-      "type": "string",
-      "enum": [
-        "Education",
-        "STEM",
-        "FIRST Robotics",
-        "Environment",
-        "Arts",
-        "Human Services"
-      ]
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Education",
+          "STEM",
+          "FIRST Robotics",
+          "Environment",
+          "Arts",
+          "Human Services",
+          "Youth Education",
+          "Community Outreach",
+          "Health & Wellness",
+          "Workforce Development"
+        ]
+      }
     },
     "annual_budget": {
       "type": "number"

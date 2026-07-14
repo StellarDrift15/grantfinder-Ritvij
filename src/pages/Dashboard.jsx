@@ -9,7 +9,8 @@ import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
 
 async function runGrantScan(formData) {
-  const isRobotics = formData.focus_area === "FIRST Robotics";
+  const focusAreas = Array.isArray(formData.focus_area) ? formData.focus_area : (formData.focus_area ? [formData.focus_area] : []);
+  const isRobotics = focusAreas.includes("FIRST Robotics");
 
   // 1. Upsert nonprofit — only pass valid entity fields
   const nonprofitData = {
@@ -53,7 +54,7 @@ async function runGrantScan(formData) {
       Arts: ['Arts', 'Education', 'Human Services'],
       "Human Services": ['Human Services', 'Education', 'Arts', 'Environment'],
     };
-    const relevantSectors = focusSectors[formData.focus_area] || [];
+    const relevantSectors = Array.from(new Set(focusAreas.flatMap(fa => focusSectors[fa] || [])));
     const sectorMatches = allOpportunities.filter(o => (o.target_sectors || []).some(s => relevantSectors.includes(s)));
     const others = allOpportunities.filter(o => !(o.target_sectors || []).some(s => relevantSectors.includes(s)));
     opportunities = [...sectorMatches, ...others].slice(0, 60);
@@ -72,7 +73,7 @@ async function runGrantScan(formData) {
 ORGANIZATION PROFILE:
 Name: ${formData.nonprofit_name}
 EIN: ${formData.ein_number}
-Focus Area: ${formData.focus_area}
+Focus Areas: ${focusAreas.join(", ")}
 Annual Budget: $${formData.annual_budget || "Not specified"}
 Location: ${formData.location || "Not specified"}
 Mission & Keywords: ${formData.mission_keywords || "Not specified"}
