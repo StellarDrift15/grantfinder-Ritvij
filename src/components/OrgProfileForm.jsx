@@ -160,8 +160,9 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col gap-5"
+      className="flex flex-col flex-1 min-h-0"
     >
+      <div className="flex-1 overflow-y-auto px-6 pb-2 flex flex-col gap-5">
       {/* EIN with auto-lookup */}
       <div className="flex flex-col gap-1.5">
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -225,7 +226,7 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
           <Tag size={12} /> Focus Areas <span className="text-indigo-500">*</span>
         </label>
         <p className="text-xs text-slate-400 -mt-1">Select all that apply — more tags mean more accurate AI matches.</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/50 backdrop-blur-sm p-3 flex flex-wrap gap-2 min-h-[52px]">
           {FOCUS_AREAS.map((fa) => {
             const selected = Array.isArray(form.focus_area) && form.focus_area.includes(fa.value);
             return (
@@ -236,7 +237,7 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
                 className={`rounded-full px-3.5 py-2 text-xs font-semibold border transition-all duration-150 active:scale-95 ${
                   selected
                     ? "bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                    : "bg-white/70 backdrop-blur text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:bg-white"
                 }`}
               >
                 {fa.label}
@@ -255,7 +256,7 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col gap-4 rounded-2xl bg-indigo-50 border border-indigo-100 p-4"
+            className="flex flex-col gap-4 rounded-2xl bg-indigo-50/70 backdrop-blur-sm border border-indigo-100 p-4"
           >
             <div className="flex items-center gap-2">
               <HelpCircle size={14} className="text-indigo-500 shrink-0" />
@@ -351,24 +352,28 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
           {error}
         </motion.div>
       )}
+      </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 shadow-md shadow-indigo-200"
-      >
-        {loading ? (
-          <>
-            <Loader2 size={16} className="animate-spin" />
-            Scanning Grants…
-          </>
-        ) : (
-          <>
-            <Zap size={16} />
-            Scan Eligible Grants
-          </>
-        )}
-      </button>
+      {/* Pinned action */}
+      <div className="px-5 py-4 border-t border-white/50 bg-white/55 backdrop-blur-xl">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 shadow-lg shadow-indigo-300/40"
+        >
+          {loading ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Scanning Grants…
+            </>
+          ) : (
+            <>
+              <Zap size={16} />
+              Scan for Funding
+            </>
+          )}
+        </button>
+      </div>
     </motion.form>
   );
 }

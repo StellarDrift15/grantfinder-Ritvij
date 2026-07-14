@@ -1,7 +1,40 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+
+const FEATURE_LINKS = [
+  {
+    to: "/sponsorship-finder",
+    Icon: Handshake,
+    title: "Sponsorship Finder",
+    subtitle: "AI-matched companies to cold email for sponsorships →",
+    base: "bg-purple-50/70 border-purple-200/60 hover:bg-purple-100/80 hover:border-purple-300",
+    active: "bg-purple-100/80 border-purple-400 shadow-md shadow-purple-200/40",
+    iconWrap: "bg-purple-100 group-hover:bg-purple-200",
+    iconColor: "text-purple-600",
+  },
+  {
+    to: "/cold-calling",
+    Icon: Phone,
+    title: "Effective Fundraising Strategy",
+    subtitle: "Raise a confirmed $100k+ — used by nonprofits across 5+ states →",
+    base: "bg-amber-50/70 border-amber-200/60 hover:bg-amber-100/80 hover:border-amber-300",
+    active: "bg-amber-100/80 border-amber-400 shadow-md shadow-amber-200/40",
+    iconWrap: "bg-amber-100 group-hover:bg-amber-200",
+    iconColor: "text-amber-600",
+  },
+  {
+    to: "/draft-reviewer",
+    Icon: ClipboardCheck,
+    title: "Draft Reviewer",
+    subtitle: "AI roleplays as your target funder & critiques your draft →",
+    base: "bg-indigo-50/70 border-indigo-200/60 hover:bg-indigo-100/80 hover:border-indigo-300",
+    active: "bg-indigo-100/80 border-indigo-400 shadow-md shadow-indigo-200/40",
+    iconWrap: "bg-indigo-100 group-hover:bg-indigo-200",
+    iconColor: "text-indigo-600",
+  },
+];
 import { Phone, Handshake, ClipboardCheck } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
 import OrgProfileForm from "@/components/OrgProfileForm";
@@ -191,9 +224,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/40 flex flex-col">
       {/* Top Nav */}
-      <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 gap-3 shadow-sm">
+      <header className="h-14 bg-white/60 backdrop-blur-xl border-b border-white/40 flex items-center px-6 gap-3 shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
             <Zap size={14} className="text-white" />
@@ -213,42 +246,25 @@ export default function Dashboard() {
       </header>
       {/* Quick Links */}
       <div className="flex gap-3 mx-6 mt-3">
-        <Link
-          to="/sponsorship-finder"
-          className="flex-1 flex items-center gap-3 rounded-xl bg-purple-50 border border-purple-200 px-5 py-3 hover:bg-purple-100 transition-colors group"
-        >
-          <div className="w-8 h-8 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
-            <Handshake size={15} className="text-purple-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-800">Sponsorship Finder</p>
-            <p className="text-xs text-slate-500">AI-matched companies to cold email for sponsorships →</p>
-          </div>
-        </Link>
-        <Link
-          to="/cold-calling"
-          className="flex-1 flex items-center gap-3 rounded-xl bg-amber-50 border border-amber-200 px-5 py-3 hover:bg-amber-100 transition-colors group"
-        >
-          <div className="w-8 h-8 rounded-lg bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center transition-colors">
-            <Phone size={15} className="text-amber-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-800">Effective Fundraising Strategy</p>
-            <p className="text-xs text-slate-500">Raise a confirmed $100k+ — used by nonprofits across 5+ states →</p>
-          </div>
-        </Link>
-        <Link
-          to="/draft-reviewer"
-          className="flex-1 flex items-center gap-3 rounded-xl bg-indigo-50 border border-indigo-200 px-5 py-3 hover:bg-indigo-100 transition-colors group"
-        >
-          <div className="w-8 h-8 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center transition-colors">
-            <ClipboardCheck size={15} className="text-indigo-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-800">Draft Reviewer</p>
-            <p className="text-xs text-slate-500">AI roleplays as your target funder & critiques your draft →</p>
-          </div>
-        </Link>
+        {FEATURE_LINKS.map((f) => (
+          <NavLink
+            key={f.to}
+            to={f.to}
+            className={({ isActive }) =>
+              `flex-1 flex items-center gap-3 rounded-xl border px-5 py-3 transition-all duration-200 group backdrop-blur-md hover:-translate-y-0.5 ${
+                isActive ? f.active : f.base
+              }`
+            }
+          >
+            <div className={`w-8 h-8 rounded-lg ${f.iconWrap} flex items-center justify-center transition-colors`}>
+              <f.Icon size={15} className={f.iconColor} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-slate-800">{f.title}</p>
+              <p className="text-xs text-slate-500">{f.subtitle}</p>
+            </div>
+          </NavLink>
+        ))}
       </div>
 
       {showDriveImport && (
@@ -261,10 +277,9 @@ export default function Dashboard() {
       {/* Split-screen body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Profile Sidebar */}
-        <aside className="w-[380px] min-w-[320px] max-w-[420px] bg-white border-r border-slate-100 overflow-y-auto">
-          <div className="p-6">
+        <aside className="w-[380px] min-w-[320px] max-w-[420px] bg-white/55 backdrop-blur-xl border-r border-white/40 flex flex-col">
             {/* Card header */}
-            <div className="mb-6">
+            <div className="px-6 pt-6 pb-3">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center">
                   <span className="text-white text-[10px] font-bold">1</span>
@@ -281,7 +296,6 @@ export default function Dashboard() {
               onScanComplete={handleScanComplete}
               onFormSubmit={handleFormSubmit}
             />
-          </div>
         </aside>
 
         {/* Right: Results Panel */}
