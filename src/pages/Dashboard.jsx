@@ -177,7 +177,16 @@ RESPONSE SCHEMA:
     },
   });
 
-  const matches = llmResponse?.matches || [];
+  // Dedupe matches by funding_id — keep the highest-confidence entry for each opportunity
+  const byId = new Map();
+  for (const m of (llmResponse?.matches || [])) {
+    if (!m || !m.funding_id) continue;
+    const prev = byId.get(m.funding_id);
+    if (!prev || (m.match_confidence || 0) > (prev.match_confidence || 0)) {
+      byId.set(m.funding_id, m);
+    }
+  }
+  const matches = Array.from(byId.values());
   if (matches.length === 0) return [];
 
   // 5. Save MatchingResults and enrich with opportunity data
