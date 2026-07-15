@@ -41,6 +41,25 @@ import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
 import { base44 } from "@/api/base44Client";
 
+function buildOpportunityReason(opportunity) {
+  const title = opportunity.title;
+  const prov = opportunity.provider_name;
+  const bits = [`${title} from ${prov}`];
+  if (opportunity.type) bits.push(`is a ${opportunity.type}`);
+  if (opportunity.value_amount) bits.push(`worth up to $${Number(opportunity.value_amount).toLocaleString()}`);
+  bits.push(".");
+  if (opportunity.description) bits.push(opportunity.description);
+  if (opportunity.type === "Cash Grant") {
+    bits.push("This funding can directly offset registration, travel, or program costs for your organization.");
+  } else if (opportunity.type === "Store Credit") {
+    bits.push("This credit reduces out-of-pocket spending on critical hardware and supplies.");
+  } else if (opportunity.type === "Material Sponsorship") {
+    bits.push("This sponsorship provides physical materials at no cost, lowering your operating expenses.");
+  }
+  if (opportunity.application_url) bits.push("Apply via the link on this card.");
+  return bits.join(" ");
+}
+
 async function runGrantScan(formData) {
   const focusAreas = Array.isArray(formData.focus_area) ? formData.focus_area : (formData.focus_area ? [formData.focus_area] : []);
   const isRobotics = focusAreas.includes("FIRST Robotics");
@@ -194,14 +213,26 @@ RESPONSE SCHEMA:
   opportunities.forEach((o) => { opportunityMap[o.id] = o; });
 
   const confidenceThreshold = isFIRST ? 50 : 60;
+  const allTitles = opportunities.map((o) => o.title).filter(Boolean);
   const resultsToSave = matches
     .filter((m) => m.match_confidence > confidenceThreshold && opportunityMap[m.funding_id])
-    .map((m) => ({
-      search_id: searchRecord.id,
-      funding_id: m.funding_id,
-      match_confidence: Math.min(100, Math.round(m.match_confidence)),
-      match_reason: m.match_reason,
-    }));
+    .map((m) => {
+      const opp = opportunityMap[m.funding_id];
+      const correctTitle = (opp.title || "").toLowerCase();
+      const reason = (m.match_reason || "").toLowerCase();
+      const mentionsCorrect = correctTitle && reason.includes(correctTitle);
+      const mentionsOther = allTitles.some(
+        (t) => t && t.toLowerCase() !== correctTitle && reason.includes(t.toLowerCase())
+      );
+      const match_reason =
+        !mentionsCorrect || mentionsOther ? buildOpportunityReason(opp) : m.match_reason;
+      return {
+        search_id: searchRecord.id,
+        funding_id: m.funding_id,
+        match_confidence: Math.min(100, Math.round(m.match_confidence)),
+        match_reason,
+      };
+    });
 
   let savedResults = [];
   if (resultsToSave.length > 0) {
