@@ -20,7 +20,6 @@ function buildSponsorReason(sponsor, teamData, isMentor) {
       parts.push(`${name}'s status is "${sponsor.sponsorship_status}".`);
     }
     if (sponsor.description) parts.push(sponsor.description);
-    if (sponsor.community_notes) parts.push(`Community notes: ${sponsor.community_notes}`);
   }
   if (sponsor.contact_phone) {
     parts.push(`Call ${name} first at ${sponsor.contact_phone}, then follow up by email.`);
@@ -28,6 +27,20 @@ function buildSponsorReason(sponsor, teamData, isMentor) {
     parts.push(`Email ${sponsor.contact_email} with your team summary and sponsorship ask.`);
   }
   return parts.join(" ");
+}
+
+function stripCommunityNotes(reason, sponsor) {
+  if (!reason) return reason;
+  let cleaned = reason;
+  const notes = (sponsor && sponsor.community_notes) || "";
+  if (notes) {
+    const esc = notes.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    cleaned = cleaned.replace(new RegExp(`\\s*Community\\s*notes?:\\s*${esc}\\.?\\s*`, "gi"), " ");
+    cleaned = cleaned.replace(new RegExp(`\\s*Note:\\s*${esc}\\.?\\s*`, "gi"), " ");
+    cleaned = cleaned.replace(new RegExp(`\\s+${esc}\\.?\\s*$`, "i"), " ");
+  }
+  cleaned = cleaned.replace(/\s*Community\s*notes?:\s*[^.]*\.\s*/gi, " ");
+  return cleaned.replace(/\s+/g, " ").trim();
 }
 
 async function runSponsorshipScan(teamData) {
@@ -100,7 +113,8 @@ CRITICAL INSTRUCTIONS:
   5. OUTREACH ORDER: When a phone number is available for a sponsor (status "Call Required" or any sponsor with contact info), ALWAYS recommend calling first before emailing. Format advice as: "Call [company] first at their main number, introduce your team, then follow up with an email." If no phone contact is available, then recommend email outreach.
   6. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace — referencing THAT company by name throughout.
   7. ACCURACY IS CRITICAL: The match_reason for each entry MUST describe ONLY the sponsor identified by that sponsor_id. Read that sponsor's company_name, description, and community notes carefully. Begin the match_reason by naming that company's EXACT name verbatim. NEVER mention or describe a different company from the list — if you reference another company's name, program, email, or phone, the entry is wrong. All contact details (email/phone) in the reason must belong to THAT sponsor only.
-  8. Return ALL sponsors scoring above 45, sorted by score descending.`;
+  8. Return ALL sponsors scoring above 45, sorted by score descending.
+  9. Do NOT include, quote, or paraphrase the "CommunityNotes" field in your match_reason — that information is shown to the user separately. The match_reason should focus on fit, status, and outreach steps only.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -152,6 +166,7 @@ CRITICAL INSTRUCTIONS:
       if (!mentionsCorrect || otherNames.length > 0) {
         reason = buildSponsorReason(sponsor, teamData, isMentor);
       }
+      reason = stripCommunityNotes(reason, sponsor);
       return {
         ...m,
         match_reason: reason,
@@ -175,7 +190,7 @@ CRITICAL INSTRUCTIONS:
         enriched.unshift({
           sponsor_id: id,
           match_confidence: 92,
-          match_reason: `Your team has an internal connection at ${s.company_name}! Ask your mentor/coach to:\n1. Contact their company's Community Relations or CSR team directly.\n2. Ask specifically about volunteer grant programs (many companies like Microsoft match volunteer hours with cash donations to nonprofits/STEM teams).\n3. Have them mention your FIRST Robotics team by name and your EIN number.\n4. Request any available matching gift, volunteer hour grants, or direct STEM sponsorship.\n${s.community_notes ? "\nNote: " + s.community_notes : ""}`,
+          match_reason: `Your team has an internal connection at ${s.company_name}! Ask your mentor/coach to:\n1. Contact their company's Community Relations or CSR team directly.\n2. Ask specifically about volunteer grant programs (many companies like Microsoft match volunteer hours with cash donations to nonprofits/STEM teams).\n3. Have them mention your FIRST Robotics team by name and your EIN number.\n4. Request any available matching gift, volunteer hour grants, or direct STEM sponsorship.`,
           has_mentor_connection: true,
           sponsor: s,
         });
