@@ -6,6 +6,30 @@ import { base44 } from "@/api/base44Client";
 import SponsorshipProfileForm from "@/components/sponsorship/SponsorshipProfileForm";
 import SponsorshipResults from "@/components/sponsorship/SponsorshipResults";
 
+function buildSponsorReason(sponsor, teamData, isMentor) {
+  const name = sponsor.company_name;
+  const parts = [];
+  if (isMentor) {
+    parts.push(`${name} is a top match because your team has an internal connection there.`);
+    parts.push(`Ask your mentor/coach to contact ${name}'s Community Relations or CSR team about volunteer grants and STEM sponsorship.`);
+  } else {
+    parts.push(`${name} is a strong sponsorship fit for your ${teamData.program_type || "robotics"} team.`);
+    if (sponsor.sponsorship_status === "Open Grant" || sponsor.sponsorship_status === "Confirmed Sponsor") {
+      parts.push(`${name} is a proven, accessible sponsor (${sponsor.sponsorship_status}).`);
+    } else if (sponsor.sponsorship_status) {
+      parts.push(`${name}'s status is "${sponsor.sponsorship_status}".`);
+    }
+    if (sponsor.description) parts.push(sponsor.description);
+    if (sponsor.community_notes) parts.push(`Community notes: ${sponsor.community_notes}`);
+  }
+  if (sponsor.contact_phone) {
+    parts.push(`Call ${name} first at ${sponsor.contact_phone}, then follow up by email.`);
+  } else if (sponsor.contact_email) {
+    parts.push(`Email ${sponsor.contact_email} with your team summary and sponsorship ask.`);
+  }
+  return parts.join(" ");
+}
+
 async function runSponsorshipScan(teamData) {
   const allSponsors = await base44.entities.Sponsorships.list();
   if (allSponsors.length === 0) return [];
@@ -75,7 +99,8 @@ CRITICAL INSTRUCTIONS:
   4. The match_reason for each entry MUST mention that company's EXACT name in the first sentence. Write as if you are speaking about ONLY that one company.
   5. OUTREACH ORDER: When a phone number is available for a sponsor (status "Call Required" or any sponsor with contact info), ALWAYS recommend calling first before emailing. Format advice as: "Call [company] first at their main number, introduce your team, then follow up with an email." If no phone contact is available, then recommend email outreach.
   6. If has_mentor_connection is true, the match_reason must be a step-by-step internal guide (3-4 steps) for the mentor to unlock sponsorship at their workplace — referencing THAT company by name throughout.
-  7. Return ALL sponsors scoring above 45, sorted by score descending.`;
+  7. ACCURACY IS CRITICAL: The match_reason for each entry MUST describe ONLY the sponsor identified by that sponsor_id. Read that sponsor's company_name, description, and community notes carefully. Begin the match_reason by naming that company's EXACT name verbatim. NEVER mention or describe a different company from the list — if you reference another company's name, program, email, or phone, the entry is wrong. All contact details (email/phone) in the reason must belong to THAT sponsor only.
+  8. Return ALL sponsors scoring above 45, sorted by score descending.`;
 
   const llmResponse = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -116,10 +141,16 @@ CRITICAL INSTRUCTIONS:
     .map((m) => {
       const sponsor = sponsorMap[m.sponsor_id];
       const correctName = sponsor.company_name;
-      // If the reason doesn't mention the correct company name, prepend a correction
       let reason = m.match_reason || "";
-      if (correctName && !reason.toLowerCase().includes(correctName.toLowerCase())) {
-        reason = `${correctName} is a strong match for your team. ${reason}`;
+      const correctLower = correctName ? correctName.toLowerCase() : "";
+      const reasonLower = reason.toLowerCase();
+      const mentionsCorrect = correctLower && reasonLower.includes(correctLower);
+      const otherNames = allSponsors
+        .map((s) => s.company_name)
+        .filter((n) => n && n.toLowerCase() !== correctLower && reasonLower.includes(n.toLowerCase()));
+      const isMentor = mentorMatchedIds.has(m.sponsor_id);
+      if (!mentionsCorrect || otherNames.length > 0) {
+        reason = buildSponsorReason(sponsor, teamData, isMentor);
       }
       return {
         ...m,
