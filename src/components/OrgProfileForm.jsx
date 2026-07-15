@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 const FOCUS_AREAS = [
   { value: "STEM", label: "STEM" },
   { value: "FIRST Robotics", label: "FIRST Robotics (FRC/FTC)" },
+  { value: "FIRST LEGO League (FLL)", label: "FIRST LEGO League (FLL)" },
   { value: "Education", label: "Education" },
   { value: "Youth Education", label: "Youth Education" },
   { value: "Community Outreach", label: "Community Outreach" },
@@ -36,6 +37,13 @@ const CATEGORY_QUESTIONS = {
     { name: "serves_low_income_youth", label: "Does your team serve low-income or underrepresented youth?", type: "select", options: ["Yes", "No"], hint: "Boosts eligibility for equity-focused grants." },
     { name: "years_of_programming", label: "Years Active", type: "select", options: ["Less than 1 year", "1–2 years", "3–5 years", "5+ years"], hint: "Longer history increases credibility for larger grants." },
     { name: "school_affiliation", label: "School/Community Affiliation", type: "select", options: ["Public school team", "Private school team", "Community/independent team", "Other"], hint: "Affects eligibility for school-based grants like Publix." },
+  ],
+  "FIRST LEGO League (FLL)": [
+    { name: "fll_program_level", label: "FLL Program Level", type: "select", options: ["FLL Discover (ages 4–6)", "FLL Explore (ages 6–10)", "FLL Challenge (ages 9–16)", "Multiple levels"], hint: "FLL has age-divided subprograms; some grants fund specific levels." },
+    { name: "team_number", label: "Team Number (optional)", type: "text", placeholder: "e.g. FLL 12345", hint: "Useful for sponsor verification." },
+    { name: "serves_low_income_youth", label: "Do you serve low-income or underrepresented youth?", type: "select", options: ["Yes", "No"], hint: "Boosts eligibility for equity-focused grants." },
+    { name: "years_of_programming", label: "Years Active", type: "select", options: ["Less than 1 year", "1–2 years", "3–5 years", "5+ years"], hint: "Longer history increases credibility for larger grants." },
+    { name: "school_affiliation", label: "School/Community Affiliation", type: "select", options: ["Public school team", "Private school team", "Community/independent team", "Other"], hint: "Affects eligibility for school-based grants." },
   ],
   Environment: [
     { name: "environmental_focus", label: "Primary Environmental Focus", type: "select", options: ["Conservation/wildlife", "Climate/energy", "Sustainability/green communities", "Environmental education", "Open space/parks"], hint: "Matches to funders like MDU, Cafritz, and Block Foundation." },

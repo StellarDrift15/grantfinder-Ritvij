@@ -44,6 +44,8 @@ import { base44 } from "@/api/base44Client";
 async function runGrantScan(formData) {
   const focusAreas = Array.isArray(formData.focus_area) ? formData.focus_area : (formData.focus_area ? [formData.focus_area] : []);
   const isRobotics = focusAreas.includes("FIRST Robotics");
+  const isFLL = focusAreas.includes("FIRST LEGO League (FLL)");
+  const isFIRST = isRobotics || isFLL;
 
   // 1. Upsert nonprofit — only pass valid entity fields
   const nonprofitData = {
@@ -71,9 +73,18 @@ async function runGrantScan(formData) {
   // 3. Fetch funding opportunities — filter by relevance to reduce prompt size
   const allOpportunities = await base44.entities.FundingOpportunities.list();
 
-  // Pre-filter: for robotics, prioritize robotics grants + STEM; for others, filter by sector
+  // Pre-filter: for FLL/robotics, prioritize program-specific grants + STEM; for others, filter by sector
+  const fllKeywords = ['fll', 'lego league', 'class pack', 'first lego'];
+  const matchesFll = (o) => fllKeywords.some(k => (o.title + ' ' + (o.description || '') + ' ' + (o.target_sectors || []).join(' ')).toLowerCase().includes(k));
   let opportunities = allOpportunities;
-  if (isRobotics) {
+  if (isFLL) {
+    // FLL teams: FLL-specific grants first, then other robotics grants, then STEM/Education
+    const fllFirst = allOpportunities.filter(matchesFll);
+    const roboticsOthers = allOpportunities.filter(o => !fllFirst.includes(o) && o.accepts_robotics_teams);
+    const stemOthers = allOpportunities.filter(o => !fllFirst.includes(o) && !roboticsOthers.includes(o) && (o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
+    const rest = allOpportunities.filter(o => !fllFirst.includes(o) && !roboticsOthers.includes(o) && !stemOthers.includes(o));
+    opportunities = [...fllFirst, ...roboticsOthers, ...stemOthers, ...rest].slice(0, 60);
+  } else if (isRobotics) {
     // Robotics teams: robotics-flagged first, then STEM/Education
     const roboticsFirst = allOpportunities.filter(o => o.accepts_robotics_teams);
     const stemOthers = allOpportunities.filter(o => !o.accepts_robotics_teams && (o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
@@ -111,11 +122,16 @@ Annual Budget: $${formData.annual_budget || "Not specified"}
 Location: ${formData.location || "Not specified"}
 Mission & Keywords: ${formData.mission_keywords || "Not specified"}
 
-${isRobotics ? `CRITICAL ROBOTICS INSTRUCTIONS: This is a FIRST Robotics (FTC/FRC) team based in ${formData.location || "Texas"}.
+${isFLL ? `CRITICAL FLL INSTRUCTIONS: This is a FIRST LEGO League (FLL) team based in ${formData.location || "the US"}.
+- AUTOMATICALLY score 90–100 for FLL-specific opportunities (title or description contains "FLL", "LEGO League", "Class Pack", "FIRST LEGO", "Explore", "Discover") — these are explicitly designed for FLL teams.
+- Score 85–95 for general FIRST/robotics material sponsorships (LEGO Education, REV, AndyMark) that explicitly serve FLL.
+- IMPORTANT: Score 0–30 and EXCLUDE grants that are explicitly FTC-only or FRC-only (titles containing "FTC" or "FRC" without "FLL") — an FLL team is NOT eligible for FTC/FRC programs. For example "FTC Hardship Registration Grant" or any FRC Rookie Grant is INELIGIBLE for an FLL team.
+- Score 60–80 for broad STEM/education grants and store credits any youth STEM program can use.` : isRobotics ? `CRITICAL ROBOTICS INSTRUCTIONS: This is a FIRST Robotics (FTC/FRC) team based in ${formData.location || "Texas"}.
 - AUTOMATICALLY score 90–100 for any opportunity with these keywords in the title or description: "Swyft", "Polymaker", "Gene Haas", "Haas Foundation", "FIRST in Texas", "FiT Grant", "FTC", "FRC", "FIRST Robotics" — these are highly accessible grants specifically designed for teams like this one.
-- Score 80–95 for ALL opportunities where 'Accepts Robotics Teams' is TRUE — robotics teams are the primary intended audience.
+- IMPORTANT: Score 0–30 and EXCLUDE grants that are explicitly FLL-only (titles containing "FLL", "LEGO League", "Class Pack") — an FTC/FRC team is generally NOT eligible for FLL-only grants.
+- Score 80–95 for ALL opportunities where 'Accepts Robotics Teams' is TRUE and the program type is compatible.
 - Score 70–85 for STEM/education material sponsorships and store credits (REV Robotics, AndyMark, Vex, Limelight, PTC/Creo, Autodesk) — these directly reduce team costs.
-- DO NOT score robotics-eligible grants below 75 unless there is a clear hard eligibility conflict (wrong geography, wrong program type).
+- DO NOT score compatible robotics-eligible grants below 75 unless there is a clear hard eligibility conflict (wrong geography, wrong program type).
 - Texas-based teams: give extra weight to Texas-specific grants (FIRST in Texas Foundation, Texas Instruments, etc.).` : "Match the organization's focus area and mission to relevant target sectors. For general nonprofits, note how Store Credits (like Google Ad Grants) and Material Sponsorships save operational costs. Prioritize sector-aligned opportunities."}
 
 AVAILABLE FUNDING OPPORTUNITIES:
@@ -123,8 +139,9 @@ ${opportunitiesText}
 
 INSTRUCTIONS:
 1. Score each opportunity 0–100 based on alignment with the nonprofit's focus area, mission keywords, and sector.
-2. For opportunities scoring above 60, write a brief 2-sentence explanation of eligibility — specifically note how this type of funding (cash grant, store credit, or material sponsorship) benefits this particular organization.
-3. Return ONLY opportunities scoring above 60, sorted by score descending.
+2. ACCURACY IS CRITICAL: For each match, the match_reason MUST describe ONLY the opportunity identified by that funding_id. Read that opportunity's title, provider_name, and description carefully. Begin the match_reason by naming that opportunity's EXACT title verbatim from the list. NEVER describe or name a different grant, and never invent a title that is not in the list. If the program type does not match the team (e.g. an FTC/FRC-only grant for an FLL team, or an FLL-only grant for an FTC/FRC team), score it below 30 and exclude it.
+3. For opportunities scoring above 60, write a brief 2-sentence explanation of eligibility — specifically note how this type of funding (cash grant, store credit, or material sponsorship) benefits this particular organization.
+4. Return ONLY opportunities scoring above 60, sorted by score descending.
 
 RESPONSE SCHEMA:
 {
@@ -167,7 +184,7 @@ RESPONSE SCHEMA:
   const opportunityMap = {};
   opportunities.forEach((o) => { opportunityMap[o.id] = o; });
 
-  const confidenceThreshold = isRobotics ? 50 : 60;
+  const confidenceThreshold = isFIRST ? 50 : 60;
   const resultsToSave = matches
     .filter((m) => m.match_confidence > confidenceThreshold && opportunityMap[m.funding_id])
     .map((m) => ({
