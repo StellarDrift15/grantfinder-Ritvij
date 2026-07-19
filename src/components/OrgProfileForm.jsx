@@ -15,6 +15,7 @@ const FOCUS_AREAS = [
   { value: "Human Services", label: "Human Services" },
   { value: "Health & Wellness", label: "Health & Wellness" },
   { value: "Workforce Development", label: "Workforce Development" },
+  { value: "Hackathon", label: "Hackathon" },
 ];
 
 // Category-specific eligibility questions
