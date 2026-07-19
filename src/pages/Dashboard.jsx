@@ -34,8 +34,18 @@ const FEATURE_LINKS = [
     iconWrap: "bg-indigo-100 group-hover:bg-indigo-200",
     iconColor: "text-indigo-600",
   },
+  {
+    to: "/in-kind-donations",
+    Icon: Gift,
+    title: "In-Kind Donations",
+    subtitle: "Find companies donating goods, materials & store credits →",
+    base: "bg-teal-50/70 border-teal-200/60 hover:bg-teal-100/80 hover:border-teal-300",
+    active: "bg-teal-100/80 border-teal-400 shadow-md shadow-teal-200/40",
+    iconWrap: "bg-teal-100 group-hover:bg-teal-200",
+    iconColor: "text-teal-600",
+  },
 ];
-import { Phone, Handshake, ClipboardCheck } from "lucide-react";
+import { Phone, Handshake, ClipboardCheck, Gift } from "lucide-react";
 import ImportFromDriveModal from "@/components/ImportFromDriveModal";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsPanel from "@/components/ResultsPanel";
