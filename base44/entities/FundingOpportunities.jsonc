@@ -13,7 +13,8 @@
       "enum": [
         "Cash Grant",
         "Store Credit",
-        "Material Sponsorship"
+        "Material Sponsorship",
+        "Advertisement"
       ]
     },
     "value_amount": {
