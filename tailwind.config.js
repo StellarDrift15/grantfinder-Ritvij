@@ -59,6 +59,21 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			gf: {
+  				ink: 'var(--gf-ink)',
+  				hi: 'var(--gf-hi)',
+  				mid: 'var(--gf-mid)',
+  				low: 'var(--gf-low)',
+  				violet: 'var(--gf-violet)',
+  				sky: 'var(--gf-sky)',
+  				cyan: 'var(--gf-cyan)',
+  				mint: 'var(--gf-mint)',
+  				amber: 'var(--gf-amber)',
+  				panel: 'var(--gf-panel)',
+  				'panel-hi': 'var(--gf-panel-hi)',
+  				line: 'var(--gf-line)',
+  				'line-hi': 'var(--gf-line-hi)'
   			}
   		},
   		fontFamily: {
@@ -69,20 +84,12 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
   			}
   		},
   		animation: {

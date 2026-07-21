@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Gift } from "lucide-react";
+import { Gift } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import Shell from "@/components/Shell";
 import OrgProfileForm from "@/components/OrgProfileForm";
-import ResultsPanel from "@/components/ResultsPanel";
+import ResultsArea from "@/components/dashboard/ResultsArea";
 
 function buildInKindReason(opp) {
   const parts = [`${opp.title} from ${opp.provider_name}`];
@@ -29,13 +29,11 @@ async function runInKindScan(formData) {
       : [];
 
   const allOpportunities = await base44.entities.FundingOpportunities.list();
-  // In-kind donations = Store Credits + Material Sponsorships (goods/credits, not cash)
   const inKindOpps = allOpportunities.filter(
     (o) => o.type === "Store Credit" || o.type === "Material Sponsorship"
   );
   if (inKindOpps.length === 0) return [];
 
-  // Upsert nonprofit profile + search history (consistent with the grant dashboard)
   const nonprofitData = {
     nonprofit_name: formData.nonprofit_name,
     ein_number: formData.ein_number,
@@ -110,7 +108,6 @@ RESPONSE SCHEMA:
     },
   });
 
-  // Dedupe by funding_id — keep highest confidence
   const byId = new Map();
   for (const m of llmResponse?.matches || []) {
     if (!m || !m.funding_id) continue;
@@ -179,57 +176,40 @@ export default function InKindDonations() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-cyan-50/40 flex flex-col">
-      <header className="h-14 bg-white/60 backdrop-blur-xl border-b border-white/40 flex items-center px-6 gap-3 shadow-sm">
-        <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-800 transition-colors">
-          <ArrowLeft size={16} />
-          Back to Grant Finder
-        </Link>
-        <div className="h-4 w-px bg-slate-200 mx-1" />
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center">
-            <Gift size={14} className="text-white" />
-          </div>
-          <span className="text-base font-bold text-slate-800 tracking-tight">In-Kind Donations Finder</span>
+    <Shell active="">
+      <div className="flex items-center gap-3 mb-6">
+        <span
+          className="w-10 h-10 rounded-xl grid place-items-center border shrink-0"
+          style={{ background: "rgba(251,191,36,0.12)", borderColor: "rgba(251,191,36,0.28)" }}
+        >
+          <Gift size={18} className="text-[#FCD34D]" />
+        </span>
+        <div>
+          <h1 className="font-display text-xl font-bold text-gf-hi">In-kind donations</h1>
+          <p className="text-sm text-gf-low">Companies donating goods, materials, and store credits.</p>
         </div>
-        <div className="ml-auto">
-          <span className="rounded-full bg-teal-50 border border-teal-100 px-3 py-1 text-xs font-semibold text-teal-600">
-            Goods, Materials & Store Credits
-          </span>
-        </div>
-      </header>
+      </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-[380px] min-w-[320px] max-w-[420px] bg-white/55 backdrop-blur-xl border-r border-white/40 flex flex-col">
-          <div className="px-6 pt-6 pb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 rounded-md bg-teal-700 flex items-center justify-center">
-                <span className="text-white text-[10px] font-bold">1</span>
-              </div>
-              <h1 className="text-lg font-bold text-slate-800">Organization Profile</h1>
-            </div>
-            <p className="text-xs text-slate-400 ml-7">
-              Tell us about your organization so we can match you with companies donating goods, materials, and store credits.
-            </p>
-          </div>
+      <div className="grid lg:grid-cols-[400px_1fr] gap-[22px] items-start">
+        <aside className="lg:sticky lg:top-[82px]">
           <OrgProfileForm onFormSubmit={handleSubmit} />
         </aside>
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {scanError && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600"
-              >
-                {scanError}
-              </motion.div>
-            )}
-            <ResultsPanel results={results} scanning={scanning} hasScanned={hasScanned} />
-          </div>
+        <main>
+          {scanError && (
+            <div className="mb-4 rounded-xl border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.08)] px-4 py-3 text-sm text-[#FCA5A5]">
+              {scanError}
+            </div>
+          )}
+          <ResultsArea
+            results={results}
+            scanning={scanning}
+            hasScanned={hasScanned}
+            title="In-kind donation matches"
+            eyebrow="Donations · ranked by usefulness"
+            subtitle="Goods, materials, and store credits scored against your programs."
+          />
         </main>
       </div>
-    </div>
+    </Shell>
   );
 }

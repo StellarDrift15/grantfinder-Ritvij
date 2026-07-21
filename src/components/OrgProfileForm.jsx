@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Zap, Building2, Hash, MapPin, DollarSign, Tag, BookOpen, HelpCircle, Search, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  Zap,
+  Building2,
+  Hash,
+  MapPin,
+  DollarSign,
+  Tag,
+  BookOpen,
+  HelpCircle,
+  Search,
+  CheckCircle2,
+} from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const FOCUS_AREAS = [
@@ -8,18 +20,17 @@ const FOCUS_AREAS = [
   { value: "FIRST Robotics", label: "FIRST Robotics (FRC/FTC)" },
   { value: "FIRST LEGO League (FLL)", label: "FIRST LEGO League (FLL)" },
   { value: "Education", label: "Education" },
-  { value: "Youth Education", label: "Youth Education" },
-  { value: "Community Outreach", label: "Community Outreach" },
+  { value: "Youth Education", label: "Youth education" },
+  { value: "Community Outreach", label: "Community outreach" },
   { value: "Environment", label: "Environment" },
   { value: "Arts", label: "Arts" },
-  { value: "Human Services", label: "Human Services" },
-  { value: "Health & Wellness", label: "Health & Wellness" },
-  { value: "Workforce Development", label: "Workforce Development" },
-  { value: "Hackathon (Virtual)", label: "Hackathon (Virtual)" },
-  { value: "Hackathon (In-Person)", label: "Hackathon (In-Person)" },
+  { value: "Human Services", label: "Human services" },
+  { value: "Health & Wellness", label: "Health & wellness" },
+  { value: "Workforce Development", label: "Workforce development" },
+  { value: "Hackathon (Virtual)", label: "Hackathon (virtual)" },
+  { value: "Hackathon (In-Person)", label: "Hackathon (in-person)" },
 ];
 
-// Category-specific eligibility questions
 const CATEGORY_QUESTIONS = {
   Education: [
     { name: "years_of_programming", label: "Years of Programming", type: "select", options: ["Less than 1 year", "1–2 years", "3–5 years", "5+ years"], hint: "Some grants require 3–5+ years of history." },
@@ -69,10 +80,11 @@ const CATEGORY_QUESTIONS = {
   ],
 };
 
+const labelBase = "flex items-center gap-1.5 text-[11.5px] font-semibold tracking-[0.08em] uppercase text-gf-mid mb-2";
 const inputBase =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200";
+  "w-full rounded-xl border border-gf-line bg-[rgba(7,11,20,0.55)] px-3.5 py-2.5 text-sm text-gf-hi placeholder:text-[#475569] focus:outline-none focus:border-[rgba(139,92,246,0.55)] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.14)] transition";
 
-export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubmit }) {
+export default function OrgProfileForm({ onFormSubmit }) {
   const [form, setForm] = useState({
     nonprofit_name: "",
     ein_number: "",
@@ -144,9 +156,7 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
       const categoryContext = Object.entries(categoryAnswers)
         .map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`)
         .join("; ");
-
       const enrichedKeywords = [form.mission_keywords, categoryContext].filter(Boolean).join(". ");
-
       await onFormSubmit({
         ...form,
         annual_budget: form.annual_budget ? parseFloat(form.annual_budget) : null,
@@ -170,220 +180,237 @@ export default function OrgProfileForm({ onScanComplete, onScanStart, onFormSubm
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col flex-1 min-h-0"
+      className="rounded-[18px] border border-gf-line bg-gf-panel p-6"
     >
-      <div className="flex-1 overflow-y-auto px-6 pb-2 flex flex-col gap-5">
-      {/* EIN with auto-lookup */}
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Hash size={12} /> EIN Number <span className="text-indigo-500">*</span>
-        </label>
-        <div className="flex gap-2">
-          <input
-            className={inputBase + " flex-1"}
-            name="ein_number"
-            value={form.ein_number}
-            onChange={handleChange}
-            onBlur={handleEinLookup}
-            placeholder="e.g. 12-3456789"
-          />
-          <button
-            type="button"
-            onClick={handleEinLookup}
-            disabled={einLooking || form.ein_number.replace(/[^0-9]/g, "").length !== 9}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed px-3.5 text-xs font-semibold text-indigo-600 transition-colors whitespace-nowrap"
-          >
-            {einLooking ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-            {einLooking ? "Looking up" : "Lookup"}
-          </button>
-        </div>
-        {einResult && (
-          <div className="flex items-start gap-2 rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2">
-            <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-            <div className="text-xs text-emerald-700 leading-relaxed">
-              <span className="font-semibold">{einResult.name}</span>
-              {einResult.location && <span> · {einResult.location}</span>}
-              {einResult.tax_status && <span> · {einResult.tax_status}</span>}
-            </div>
+      <div className="font-mono text-[10.5px] font-semibold tracking-[0.14em] uppercase text-gf-cyan mb-2">
+        Step 1 · Organization profile
+      </div>
+      <h2 className="font-display text-gf-hi text-[21px] font-bold tracking-tight mb-1">Tell us who you are</h2>
+      <p className="text-[13px] text-gf-low mb-5">
+        The scan uses every field below to rank grants, credits, and donors by your eligibility.
+      </p>
+
+      <div className="flex flex-col gap-5">
+        {/* EIN */}
+        <div>
+          <label className={labelBase}>
+            <Hash size={13} className="text-gf-low" /> EIN number <span className="text-gf-violet">*</span>
+          </label>
+          <div className="flex gap-2">
+            <input
+              className={inputBase + " flex-1 font-mono text-[13.5px]"}
+              name="ein_number"
+              value={form.ein_number}
+              onChange={handleChange}
+              onBlur={handleEinLookup}
+              placeholder="12-3456789"
+            />
+            <button
+              type="button"
+              onClick={handleEinLookup}
+              disabled={einLooking || form.ein_number.replace(/[^0-9]/g, "").length !== 9}
+              className="px-4 rounded-xl border text-[13px] font-semibold text-[#C4B5FD] transition hover:bg-[rgba(139,92,246,0.18)] hover:border-[rgba(139,92,246,0.55)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              style={{ background: "rgba(139,92,246,0.10)", borderColor: "rgba(139,92,246,0.35)" }}
+            >
+              {einLooking ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              {einLooking ? "Looking up" : "Look up"}
+            </button>
           </div>
-        )}
-        {einError && (
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-100 px-3 py-2">
-            <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-700 leading-relaxed">{einError} You can still fill in the fields manually.</div>
-          </div>
-        )}
-        <p className="text-xs text-slate-400">Enter your 9-digit EIN — we'll auto-fill your org name & location from IRS public data.</p>
-      </div>
-
-      {/* Org Name */}
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Building2 size={12} /> Organization Name <span className="text-indigo-500">*</span>
-        </label>
-        <input
-          className={inputBase}
-          name="nonprofit_name"
-          value={form.nonprofit_name}
-          onChange={handleChange}
-          placeholder="e.g. Robotics for All Foundation"
-        />
-      </div>
-
-      {/* Focus Area Tags */}
-      <div className="flex flex-col gap-2">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Tag size={12} /> Focus Areas <span className="text-indigo-500">*</span>
-        </label>
-        <p className="text-xs text-slate-400 -mt-1">Select all that apply — more tags mean more accurate AI matches.</p>
-        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/50 backdrop-blur-sm p-3 flex flex-wrap gap-2 min-h-[52px]">
-          {FOCUS_AREAS.map((fa) => {
-            const selected = Array.isArray(form.focus_area) && form.focus_area.includes(fa.value);
-            return (
-              <button
-                key={fa.value}
-                type="button"
-                onClick={() => toggleTag(fa.value)}
-                className={`rounded-full px-3.5 py-2 text-xs font-semibold border transition-all duration-150 active:scale-95 ${
-                  selected
-                    ? "bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200"
-                    : "bg-white/70 backdrop-blur text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:bg-white"
-                }`}
-              >
-                {fa.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Category-Specific Eligibility Questions */}
-      <AnimatePresence>
-        {categoryQuestions.length > 0 && (
-          <motion.div
-            key={(form.focus_area || []).join(",")}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col gap-4 rounded-2xl bg-indigo-50/70 backdrop-blur-sm border border-indigo-100 p-4"
-          >
-            <div className="flex items-center gap-2">
-              <HelpCircle size={14} className="text-indigo-500 shrink-0" />
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
-                Eligibility Questions
-              </span>
-            </div>
-            <p className="text-xs text-indigo-500 -mt-2">
-              Based on: {(form.focus_area || []).join(", ")} — these help the AI find your best-matched grants.
-            </p>
-            {categoryQuestions.map((q) => (
-              <div key={q.name} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-600">{q.label}</label>
-                {q.type === "select" ? (
-                  <select
-                    className={inputBase + " cursor-pointer"}
-                    name={q.name}
-                    value={categoryAnswers[q.name] || ""}
-                    onChange={handleCategoryChange}
-                  >
-                    <option value="">Select…</option>
-                    {q.options.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    className={inputBase}
-                    name={q.name}
-                    value={categoryAnswers[q.name] || ""}
-                    onChange={handleCategoryChange}
-                    placeholder={q.placeholder || ""}
-                  />
-                )}
-                {q.hint && <p className="text-xs text-slate-400">{q.hint}</p>}
+          {einResult && (
+            <div className="flex items-start gap-2 rounded-lg bg-[rgba(52,211,153,0.08)] border border-[rgba(52,211,153,0.25)] px-3 py-2 mt-2">
+              <CheckCircle2 size={14} className="text-gf-mint shrink-0 mt-0.5" />
+              <div className="text-xs text-gf-mint leading-relaxed">
+                Found in IRS records — name &amp; location filled in.
               </div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Location */}
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <MapPin size={12} /> Location
-        </label>
-        <input
-          className={inputBase}
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          placeholder="e.g. Austin, Texas"
-        />
-      </div>
-
-      {/* Annual Budget */}
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <DollarSign size={12} /> Annual Budget ($)
-        </label>
-        <input
-          className={inputBase}
-          name="annual_budget"
-          type="number"
-          min="0"
-          value={form.annual_budget}
-          onChange={handleChange}
-          placeholder="e.g. 50000"
-        />
-      </div>
-
-      {/* Mission Keywords */}
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <BookOpen size={12} /> Mission & Keywords
-        </label>
-        <textarea
-          className={inputBase + " resize-none min-h-[90px]"}
-          name="mission_keywords"
-          value={form.mission_keywords}
-          onChange={handleChange}
-          placeholder="Describe your mission, programs, and key words (e.g. 'FTC robotics team, low-income youth, STEM outreach, Title I schools')"
-        />
-        <p className="text-xs text-slate-400">The AI uses these to find your best-fit grants.</p>
-      </div>
-
-      {error && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600"
-        >
-          {error}
-        </motion.div>
-      )}
-      </div>
-
-      {/* Pinned action */}
-      <div className="px-5 py-4 border-t border-white/50 bg-white/55 backdrop-blur-xl">
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 shadow-lg shadow-indigo-300/40"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Scanning Grants…
-            </>
-          ) : (
-            <>
-              <Zap size={16} />
-              Scan for Funding
-            </>
+            </div>
           )}
-        </button>
+          {einError && (
+            <div className="text-xs text-[#FCD34D] mt-2">{einError} You can still fill in the fields manually.</div>
+          )}
+          <p className="text-[12px] text-gf-low mt-2">Your 9-digit EIN autofills the rest from IRS public data.</p>
+        </div>
+
+        {/* Org name */}
+        <div>
+          <label className={labelBase}>
+            <Building2 size={13} className="text-gf-low" /> Organization name <span className="text-gf-violet">*</span>
+          </label>
+          <input
+            className={inputBase}
+            name="nonprofit_name"
+            value={form.nonprofit_name}
+            onChange={handleChange}
+            placeholder="Robotics for All Foundation"
+          />
+        </div>
+
+        {/* Focus areas */}
+        <div>
+          <label className={labelBase}>
+            <Tag size={13} className="text-gf-low" /> Focus areas <span className="text-gf-violet">*</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {FOCUS_AREAS.map((fa) => {
+              const selected = Array.isArray(form.focus_area) && form.focus_area.includes(fa.value);
+              return (
+                <button
+                  key={fa.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => toggleTag(fa.value)}
+                  className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium border transition ${
+                    selected
+                      ? "text-[#E0F2FE] border-[rgba(34,211,238,0.6)] shadow-[0_2px_12px_-4px_rgba(34,211,238,0.35)]"
+                      : "bg-[rgba(7,11,20,0.45)] border-gf-line text-gf-mid hover:border-gf-line-hi hover:text-gf-hi"
+                  }`}
+                  style={
+                    selected
+                      ? { background: "linear-gradient(120deg,rgba(139,92,246,0.16),rgba(34,211,238,0.14))" }
+                      : undefined
+                  }
+                >
+                  {fa.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[12px] text-gf-low mt-2">Pick every area that fits — more signal means sharper matches.</p>
+        </div>
+
+        {/* Category questions */}
+        <AnimatePresence>
+          {categoryQuestions.length > 0 && (
+            <motion.div
+              key={(form.focus_area || []).join(",")}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-4 rounded-2xl bg-[rgba(139,92,246,0.06)] border border-[rgba(139,92,246,0.18)] p-4"
+            >
+              <div className="flex items-center gap-2">
+                <HelpCircle size={14} className="text-gf-violet shrink-0" />
+                <span className="text-xs font-semibold text-[#C4B5FD] uppercase tracking-wider">
+                  Eligibility questions
+                </span>
+              </div>
+              <p className="text-xs text-gf-low -mt-2">
+                Based on: {(form.focus_area || []).join(", ")} — these help the AI find your best-matched grants.
+              </p>
+              {categoryQuestions.map((q) => (
+                <div key={q.name}>
+                  <label className="text-xs font-semibold text-gf-mid mb-1.5 block">{q.label}</label>
+                  {q.type === "select" ? (
+                    <select
+                      className={inputBase + " cursor-pointer"}
+                      name={q.name}
+                      value={categoryAnswers[q.name] || ""}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">Select…</option>
+                      {q.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      className={inputBase}
+                      name={q.name}
+                      value={categoryAnswers[q.name] || ""}
+                      onChange={handleCategoryChange}
+                      placeholder={q.placeholder || ""}
+                    />
+                  )}
+                  {q.hint && <p className="text-[11px] text-gf-low mt-1">{q.hint}</p>}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Location */}
+        <div>
+          <label className={labelBase}>
+            <MapPin size={13} className="text-gf-low" /> Location
+          </label>
+          <input
+            className={inputBase}
+            name="location"
+            value={form.location}
+            onChange={handleChange}
+            placeholder="Austin, Texas"
+          />
+        </div>
+
+        {/* Budget */}
+        <div>
+          <label className={labelBase}>
+            <DollarSign size={13} className="text-gf-low" /> Annual budget
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-[13px] text-gf-low">$</span>
+            <input
+              className={inputBase + " pl-8 font-mono text-[13.5px]"}
+              name="annual_budget"
+              type="number"
+              min="0"
+              value={form.annual_budget}
+              onChange={handleChange}
+              placeholder="50,000"
+            />
+          </div>
+        </div>
+
+        {/* Mission */}
+        <div>
+          <label className={labelBase}>
+            <BookOpen size={13} className="text-gf-low" /> Mission &amp; keywords
+          </label>
+          <textarea
+            className={inputBase + " resize-y min-h-[96px]"}
+            name="mission_keywords"
+            value={form.mission_keywords}
+            onChange={handleChange}
+            placeholder="e.g. FTC robotics team serving low-income youth, STEM outreach in Title I schools"
+          />
+          <p className="text-[12px] text-gf-low mt-1.5">
+            The AI weighs these words heavily when ranking your best-fit grants.
+          </p>
+        </div>
+
+        {error && (
+          <div className="rounded-xl bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.3)] px-4 py-3 text-sm text-[#FCA5A5]">
+            {error}
+          </div>
+        )}
       </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full mt-6 flex items-center justify-center gap-2.5 rounded-2xl px-5 py-3.5 text-gf-hi font-display text-[15px] font-semibold transition-all duration-150 hover:-translate-y-px disabled:opacity-70 disabled:translate-y-0"
+        style={{
+          backgroundImage: "linear-gradient(120deg,#8B5CF6,#38BDF8 55%,#22D3EE)",
+          boxShadow: "0 8px 28px -8px rgba(56,189,248,0.5),0 2px 8px -2px rgba(139,92,246,0.4)",
+        }}
+      >
+        {loading ? (
+          <>
+            <Loader2 size={16} className="animate-spin" />
+            Scanning 12,400+ sources…
+          </>
+        ) : (
+          <>
+            <Zap size={16} />
+            Scan for funding
+          </>
+        )}
+      </button>
+      <p className="text-[11.5px] text-gf-low text-center mt-2.5">
+        Searches <b className="text-gf-mid font-mono text-[11px]">12,400+</b> grants, vouchers &amp; corporate donors
+      </p>
     </motion.form>
   );
 }

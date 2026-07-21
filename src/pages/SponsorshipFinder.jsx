@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Handshake, LayoutGrid } from "lucide-react";
+import { Handshake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import Shell from "@/components/Shell";
 import SponsorshipProfileForm from "@/components/sponsorship/SponsorshipProfileForm";
 import SponsorshipResults from "@/components/sponsorship/SponsorshipResults";
 
@@ -47,20 +47,16 @@ async function runSponsorshipScan(teamData) {
   const allSponsors = await base44.entities.Sponsorships.list();
   if (allSponsors.length === 0) return [];
 
-  // Pre-match mentor connections on the frontend — multiple strategies for robustness
   const mentorText = (teamData.mentor_connections || "").toLowerCase();
   const mentorMatchedIds = new Set();
 
   function isMentorMatch(companyName) {
     if (!mentorText) return false;
     const name = companyName.toLowerCase().trim();
-    // Strategy 1: exact full name
     if (mentorText.includes(name)) return true;
-    // Strategy 2: all significant words present (ignores Inc, LLC, etc.)
     const stopWords = new Set(["the", "and", "for", "inc", "llc", "ltd", "corp", "co", "company"]);
     const words = name.split(/\s+/).filter(w => w.length > 1 && !stopWords.has(w));
     if (words.length > 0 && words.every(w => mentorText.includes(w))) return true;
-    // Strategy 3: any significant word as a whole word (catches "Microsoft" in "coach at Microsoft Volunteer")
     if (words.some(w => new RegExp(`\\b${w}\\b`).test(mentorText))) return true;
     return false;
   }
@@ -147,9 +143,6 @@ CRITICAL INSTRUCTIONS:
   const sponsorMap = {};
   allSponsors.forEach((s) => { sponsorMap[s.id] = s; });
 
-  // Track all LLM-returned sponsor IDs (before filtering) to avoid double-adding in fallback
-  const llmReturnedIds = new Set(matches.map(m => m.sponsor_id));
-
   const enriched = matches
     .filter((m) => m.match_confidence > 45 && sponsorMap[m.sponsor_id])
     .map((m) => {
@@ -176,16 +169,13 @@ CRITICAL INSTRUCTIONS:
       };
     });
 
-  // Guarantee: inject any mentor-matched company the LLM missed or scored too low
   mentorMatchedIds.forEach(id => {
     if (sponsorMap[id]) {
       const alreadyIn = enriched.find(e => e.sponsor_id === id);
       if (alreadyIn) {
-        // Make sure it's flagged and boosted
         alreadyIn.has_mentor_connection = true;
         alreadyIn.match_confidence = Math.max(alreadyIn.match_confidence, 90);
       } else {
-        // LLM missed it entirely — add it manually
         const s = sponsorMap[id];
         enriched.unshift({
           sponsor_id: id,
@@ -198,7 +188,6 @@ CRITICAL INSTRUCTIONS:
     }
   });
 
-  // Sort: mentor connections first, then by confidence
   enriched.sort((a, b) => {
     if (a.has_mentor_connection && !b.has_mentor_connection) return -1;
     if (!a.has_mentor_connection && b.has_mentor_connection) return 1;
@@ -234,48 +223,37 @@ export default function SponsorshipFinder() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-      <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 gap-3 shadow-sm">
-        <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors">
-          <ArrowLeft size={16} />
-          Back to Grant Finder
-        </Link>
-        <div className="h-4 w-px bg-slate-200 mx-1" />
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center">
-            <Handshake size={14} className="text-white" />
-          </div>
-          <span className="text-base font-bold text-slate-800 tracking-tight">Sponsorship Finder</span>
+    <Shell active="">
+      <div className="flex items-center gap-3 mb-6">
+        <span
+          className="w-10 h-10 rounded-xl grid place-items-center border shrink-0"
+          style={{ background: "rgba(139,92,246,0.12)", borderColor: "rgba(139,92,246,0.28)" }}
+        >
+          <Handshake size={18} className="text-[#A78BFA]" />
+        </span>
+        <div>
+          <h1 className="font-display text-xl font-bold text-gf-hi">Sponsorship finder</h1>
+          <p className="text-sm text-gf-low">AI-matched companies, plus a cold email drafted for each one.</p>
         </div>
-      </header>
+      </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-[380px] min-w-[320px] max-w-[420px] bg-white border-r border-slate-100 overflow-y-auto">
-          <div className="p-6">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-md bg-purple-700 flex items-center justify-center">
-                  <span className="text-white text-[10px] font-bold">1</span>
-                </div>
-                <h1 className="text-lg font-bold text-slate-800">Team Profile</h1>
-              </div>
-              <p className="text-xs text-slate-400 ml-7">Tell us about your team so we can find the best sponsors to cold email.</p>
-            </div>
-            <SponsorshipProfileForm onSubmit={handleSubmit} loading={scanning} />
-          </div>
+      <div className="grid lg:grid-cols-[400px_1fr] gap-[22px] items-start">
+        <aside className="lg:sticky lg:top-[82px]">
+          <SponsorshipProfileForm onSubmit={handleSubmit} loading={scanning} />
         </aside>
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {scanError && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
-                {scanError}
-              </motion.div>
-            )}
-            <SponsorshipResults results={results} scanning={scanning} hasScanned={hasScanned} />
-          </div>
+        <main>
+          {scanError && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-4 rounded-xl border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.08)] px-4 py-3 text-sm text-[#FCA5A5]"
+            >
+              {scanError}
+            </motion.div>
+          )}
+          <SponsorshipResults results={results} scanning={scanning} hasScanned={hasScanned} />
         </main>
       </div>
-    </div>
+    </Shell>
   );
 }

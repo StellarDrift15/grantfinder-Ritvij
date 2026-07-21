@@ -1,54 +1,8 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Zap, LayoutGrid, FolderOpen } from "lucide-react";
-import { NavLink } from "react-router-dom";
-
-const FEATURE_LINKS = [
-  {
-    to: "/sponsorship-finder",
-    Icon: Handshake,
-    title: "Sponsorship Finder",
-    subtitle: "AI-matched companies to cold email for sponsorships →",
-    base: "bg-purple-50/70 border-purple-200/60 hover:bg-purple-100/80 hover:border-purple-300",
-    active: "bg-purple-100/80 border-purple-400 shadow-md shadow-purple-200/40",
-    iconWrap: "bg-purple-100 group-hover:bg-purple-200",
-    iconColor: "text-purple-600",
-  },
-  {
-    to: "/cold-calling",
-    Icon: Phone,
-    title: "Effective Fundraising Strategy",
-    subtitle: "Raise a confirmed $100k+ — used by nonprofits across 5+ states →",
-    base: "bg-amber-50/70 border-amber-200/60 hover:bg-amber-100/80 hover:border-amber-300",
-    active: "bg-amber-100/80 border-amber-400 shadow-md shadow-amber-200/40",
-    iconWrap: "bg-amber-100 group-hover:bg-amber-200",
-    iconColor: "text-amber-600",
-  },
-  {
-    to: "/draft-reviewer",
-    Icon: ClipboardCheck,
-    title: "Draft Reviewer",
-    subtitle: "AI roleplays as your target funder & critiques your draft →",
-    base: "bg-indigo-50/70 border-indigo-200/60 hover:bg-indigo-100/80 hover:border-indigo-300",
-    active: "bg-indigo-100/80 border-indigo-400 shadow-md shadow-indigo-200/40",
-    iconWrap: "bg-indigo-100 group-hover:bg-indigo-200",
-    iconColor: "text-indigo-600",
-  },
-  {
-    to: "/in-kind-donations",
-    Icon: Gift,
-    title: "In-Kind Donations",
-    subtitle: "Find companies donating goods, materials & store credits →",
-    base: "bg-teal-50/70 border-teal-200/60 hover:bg-teal-100/80 hover:border-teal-300",
-    active: "bg-teal-100/80 border-teal-400 shadow-md shadow-teal-200/40",
-    iconWrap: "bg-teal-100 group-hover:bg-teal-200",
-    iconColor: "text-teal-600",
-  },
-];
-import { Phone, Handshake, ClipboardCheck, Gift } from "lucide-react";
-import ImportFromDriveModal from "@/components/ImportFromDriveModal";
+import Shell from "@/components/Shell";
+import ToolRail from "@/components/dashboard/ToolRail";
 import OrgProfileForm from "@/components/OrgProfileForm";
-import ResultsPanel from "@/components/ResultsPanel";
+import ResultsArea from "@/components/dashboard/ResultsArea";
 import { base44 } from "@/api/base44Client";
 
 function buildOpportunityReason(opportunity) {
@@ -76,7 +30,6 @@ async function runGrantScan(formData) {
   const isFLL = focusAreas.includes("FIRST LEGO League (FLL)");
   const isFIRST = isRobotics || isFLL;
 
-  // 1. Upsert nonprofit — only pass valid entity fields
   const nonprofitData = {
     nonprofit_name: formData.nonprofit_name,
     ein_number: formData.ein_number,
@@ -93,28 +46,23 @@ async function runGrantScan(formData) {
     nonprofit = await base44.entities.Nonprofits.create(nonprofitData);
   }
 
-  // 2. Create search history record
   const searchRecord = await base44.entities.SearchHistory.create({
     nonprofit_id: nonprofit.id,
     timestamp: new Date().toISOString(),
   });
 
-  // 3. Fetch funding opportunities — filter by relevance to reduce prompt size
   const allOpportunities = await base44.entities.FundingOpportunities.list();
 
-  // Pre-filter: for FLL/robotics, prioritize program-specific grants + STEM; for others, filter by sector
   const fllKeywords = ['fll', 'lego league', 'class pack', 'first lego'];
   const matchesFll = (o) => fllKeywords.some(k => (o.title + ' ' + (o.description || '') + ' ' + (o.target_sectors || []).join(' ')).toLowerCase().includes(k));
   let opportunities = allOpportunities;
   if (isFLL) {
-    // FLL teams: FLL-specific grants first, then other robotics grants, then STEM/Education
     const fllFirst = allOpportunities.filter(matchesFll);
     const roboticsOthers = allOpportunities.filter(o => !fllFirst.includes(o) && o.accepts_robotics_teams);
     const stemOthers = allOpportunities.filter(o => !fllFirst.includes(o) && !roboticsOthers.includes(o) && (o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
     const rest = allOpportunities.filter(o => !fllFirst.includes(o) && !roboticsOthers.includes(o) && !stemOthers.includes(o));
     opportunities = [...fllFirst, ...roboticsOthers, ...stemOthers, ...rest].slice(0, 60);
   } else if (isRobotics) {
-    // Robotics teams: robotics-flagged first, then STEM/Education
     const roboticsFirst = allOpportunities.filter(o => o.accepts_robotics_teams);
     const stemOthers = allOpportunities.filter(o => !o.accepts_robotics_teams && (o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
     const rest = allOpportunities.filter(o => !o.accepts_robotics_teams && !(o.target_sectors || []).some(s => ['STEM', 'Education', 'FIRST Robotics'].includes(s)));
@@ -133,7 +81,6 @@ async function runGrantScan(formData) {
     opportunities = [...sectorMatches, ...others].slice(0, 60);
   }
 
-  // 4. Build LLM prompt — compact format to stay within token limits
   const opportunitiesText = opportunities
     .map(
       (o, i) =>
@@ -206,7 +153,6 @@ RESPONSE SCHEMA:
     },
   });
 
-  // Dedupe matches by funding_id — keep the highest-confidence entry for each opportunity
   const byId = new Map();
   for (const m of (llmResponse?.matches || [])) {
     if (!m || !m.funding_id) continue;
@@ -218,7 +164,6 @@ RESPONSE SCHEMA:
   const matches = Array.from(byId.values());
   if (matches.length === 0) return [];
 
-  // 5. Save MatchingResults and enrich with opportunity data
   const opportunityMap = {};
   opportunities.forEach((o) => { opportunityMap[o.id] = o; });
 
@@ -264,7 +209,6 @@ export default function Dashboard() {
   const [scanning, setScanning] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [scanError, setScanError] = useState(null);
-  const [showDriveImport, setShowDriveImport] = useState(false);
 
   const handleScanStart = () => {
     setScanning(true);
@@ -291,97 +235,21 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/40 flex flex-col">
-      {/* Top Nav */}
-      <header className="h-14 bg-white/60 backdrop-blur-xl border-b border-white/40 flex items-center px-6 gap-3 shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Zap size={14} className="text-white" />
-          </div>
-          <span className="text-base font-bold text-slate-800 tracking-tight">Universal Non-Profit Funding & Voucher Matcher</span>
-        </div>
-        <div className="h-4 w-px bg-slate-200 mx-1" />
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <LayoutGrid size={13} />
-          <span>Dashboard</span>
-        </div>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-600">
-            AI-Powered Matching
-          </span>
-        </div>
-      </header>
-      {/* Quick Links */}
-      <div className="flex gap-3 mx-6 mt-3">
-        {FEATURE_LINKS.map((f) => (
-          <NavLink
-            key={f.to}
-            to={f.to}
-            className={({ isActive }) =>
-              `flex-1 flex items-center gap-3 rounded-xl border px-5 py-3 transition-all duration-200 group backdrop-blur-md hover:-translate-y-0.5 ${
-                isActive ? f.active : f.base
-              }`
-            }
-          >
-            <div className={`w-8 h-8 rounded-lg ${f.iconWrap} flex items-center justify-center transition-colors`}>
-              <f.Icon size={15} className={f.iconColor} />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">{f.title}</p>
-              <p className="text-xs text-slate-500">{f.subtitle}</p>
-            </div>
-          </NavLink>
-        ))}
-      </div>
-
-      {showDriveImport && (
-        <ImportFromDriveModal
-          onClose={() => setShowDriveImport(false)}
-          onImported={() => {}}
-        />
-      )}
-
-      {/* Split-screen body */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Profile Sidebar */}
-        <aside className="w-[380px] min-w-[320px] max-w-[420px] bg-white/55 backdrop-blur-xl border-r border-white/40 flex flex-col">
-            {/* Card header */}
-            <div className="px-6 pt-6 pb-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center">
-                  <span className="text-white text-[10px] font-bold">1</span>
-                </div>
-                <h1 className="text-lg font-bold text-slate-800">Organization Profile</h1>
-              </div>
-              <p className="text-xs text-slate-400 ml-7">
-                Tell us about your organization so we can find the most relevant grants.
-              </p>
-            </div>
-
-            <OrgProfileForm
-              onScanStart={handleScanStart}
-              onScanComplete={handleScanComplete}
-              onFormSubmit={handleFormSubmit}
-            />
+    <Shell active="Dashboard">
+      <ToolRail />
+      <div className="grid lg:grid-cols-[400px_1fr] gap-[22px] items-start">
+        <aside className="lg:sticky lg:top-[82px]">
+          <OrgProfileForm onFormSubmit={handleFormSubmit} />
         </aside>
-
-        {/* Right: Results Panel */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {scanError && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600"
-              >
-                {scanError}
-              </motion.div>
-            )}
-            <ResultsPanel results={results} scanning={scanning} hasScanned={hasScanned} />
-          </div>
+        <main>
+          {scanError && (
+            <div className="mb-4 rounded-xl border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.08)] px-4 py-3 text-sm text-[#FCA5A5]">
+              {scanError}
+            </div>
+          )}
+          <ResultsArea results={results} scanning={scanning} hasScanned={hasScanned} />
         </main>
       </div>
-
-    </div>
+    </Shell>
   );
 }
