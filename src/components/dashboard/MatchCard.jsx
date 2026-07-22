@@ -134,7 +134,7 @@ export default function MatchCard({ result, index }) {
             href={opp.application_url}
             target="_blank"
             rel="noreferrer"
-            onClick={trackGrantClick}
+            onClick={() => trackGrantClick(opp.value_amount)}
             className="text-[11.5px] text-gf-cyan hover:text-gf-sky inline-flex items-center gap-1 mt-0.5"
             >
             Apply <ExternalLink size={11} />

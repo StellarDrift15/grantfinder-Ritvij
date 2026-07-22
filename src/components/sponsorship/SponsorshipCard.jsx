@@ -101,7 +101,7 @@ export default function SponsorshipCard({ result, index }) {
 
       <div className="flex items-center gap-2">
         {sponsor.contact_email && (
-          <a href={`mailto:${sponsor.contact_email}`} onClick={trackGrantClick} className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors" style={{ background: "linear-gradient(120deg,#8B5CF6,#38BDF8 55%,#22D3EE)" }}>
+          <a href={`mailto:${sponsor.contact_email}`} onClick={() => trackGrantClick(sponsor.typical_amount)} className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors" style={{ background: "linear-gradient(120deg,#8B5CF6,#38BDF8 55%,#22D3EE)" }}>
             <Mail size={12} /> Email them
           </a>
         )}
@@ -111,7 +111,7 @@ export default function SponsorshipCard({ result, index }) {
           </a>
         )}
         {sponsor.website_url && (
-          <a href={sponsor.website_url} target="_blank" rel="noopener noreferrer" onClick={trackGrantClick} className="flex items-center gap-1.5 rounded-lg border border-gf-line hover:bg-gf-panel-hi px-3.5 py-2 text-xs font-semibold text-gf-mid transition-colors">
+          <a href={sponsor.website_url} target="_blank" rel="noopener noreferrer" onClick={() => trackGrantClick(sponsor.typical_amount)} className="flex items-center gap-1.5 rounded-lg border border-gf-line hover:bg-gf-panel-hi px-3.5 py-2 text-xs font-semibold text-gf-mid transition-colors">
             <ExternalLink size={12} /> Website
           </a>
         )}

@@ -31,23 +31,31 @@ export default Deno.serve(async (req) => {
     if (action === "track") {
       const event = body.event;
       const inc = {};
-      if (event === "grant_click") inc.grants_clicked = 1;
-      else if (event === "rewrite") inc.rewrites_generated = 1;
-      else return Response.json({ error: "Unknown event" }, { status: 400 });
+      if (event === "grant_click") {
+        inc.grants_clicked = 1;
+        const v = Number(body.value);
+        if (Number.isFinite(v) && v > 0) inc.grants_value_opened = v;
+      } else if (event === "rewrite") {
+        inc.rewrites_generated = 1;
+      } else {
+        return Response.json({ error: "Unknown event" }, { status: 400 });
+      }
 
       await svc.entities.UsageStat.updateMany({ scope: GLOBAL_SCOPE }, { $inc: inc });
       const fresh = await svc.entities.UsageStat.filter({ scope: GLOBAL_SCOPE });
       const row = (fresh && fresh[0]) || rows[0];
       return Response.json({
         grants_clicked: row.grants_clicked || 0,
+        grants_value_opened: row.grants_value_opened || 0,
         rewrites_generated: row.rewrites_generated || 0,
       });
     }
 
     // default: read
-    const row = (rows && rows[0]) || { grants_clicked: 0, rewrites_generated: 0 };
+    const row = (rows && rows[0]) || { grants_clicked: 0, grants_value_opened: 0, rewrites_generated: 0 };
     return Response.json({
       grants_clicked: row.grants_clicked || 0,
+      grants_value_opened: row.grants_value_opened || 0,
       rewrites_generated: row.rewrites_generated || 0,
     });
   } catch (error) {

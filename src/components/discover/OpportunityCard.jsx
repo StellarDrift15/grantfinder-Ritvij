@@ -26,7 +26,7 @@ export default function OpportunityCard({ opp, score, saved, onToggleSave }) {
 
   const Tag = opp.application_url ? "a" : "div";
   const tagProps = opp.application_url
-    ? { href: opp.application_url, target: "_blank", rel: "noreferrer", onClick: trackGrantClick }
+    ? { href: opp.application_url, target: "_blank", rel: "noreferrer", onClick: () => trackGrantClick(opp.value_amount) }
     : {};
 
   return (
