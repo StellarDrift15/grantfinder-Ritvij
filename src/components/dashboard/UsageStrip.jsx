@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { MousePointerClick, Wand2 } from "lucide-react";
+import { MousePointerClick, Wand2, TrendingUp } from "lucide-react";
 import { getUsage } from "@/lib/usage";
+
+function fmtMoney(n) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
 
 export default function UsageStrip() {
   const [usage, setUsage] = useState({ grants_clicked: 0, grants_value_opened: 0, rewrites_generated: 0 });
@@ -14,12 +22,13 @@ export default function UsageStrip() {
   }, []);
 
   const items = [
+    { icon: TrendingUp, label: "Est. funding uncovered", value: fmtMoney(usage.grants_value_opened), accent: "text-gf-mint", ring: "bg-[rgba(52,211,153,0.12)]", border: "border-[rgba(52,211,153,0.28)]" },
     { icon: MousePointerClick, label: "Grant links opened", value: Number(usage.grants_clicked).toLocaleString(), accent: "text-gf-cyan", ring: "bg-[rgba(56,189,248,0.12)]", border: "border-[rgba(56,189,248,0.25)]" },
     { icon: Wand2, label: "AI rewrites & drafts", value: Number(usage.rewrites_generated).toLocaleString(), accent: "text-gf-violet", ring: "bg-[rgba(139,92,246,0.14)]", border: "border-[rgba(139,92,246,0.28)]" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 mb-5">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
       {items.map((it) => {
         const Icon = it.icon;
         return (
