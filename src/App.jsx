@@ -11,6 +11,9 @@ import ColdCallingPage from "./pages/ColdCallingPage";
 import SponsorshipFinder from "./pages/SponsorshipFinder";
 import DraftReviewer from "./pages/DraftReviewer";
 import InKindDonations from "./pages/InKindDonations";
+import Discover from "./pages/Discover";
+import Saved from "./pages/Saved";
+import Reports from "./pages/Reports";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -44,6 +47,9 @@ const AuthenticatedApp = () => {
       <Route path="/sponsorship-finder" element={<SponsorshipFinder />} />
       <Route path="/draft-reviewer" element={<DraftReviewer />} />
       <Route path="/in-kind-donations" element={<InKindDonations />} />
+      <Route path="/discover" element={<Discover />} />
+      <Route path="/saved" element={<Saved />} />
+      <Route path="/reports" element={<Reports />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

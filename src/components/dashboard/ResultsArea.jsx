@@ -72,16 +72,6 @@ export default function ResultsArea({
 
   return (
     <section className="relative">
-      {/* shared svg gradient def for score rings */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="gfScoreGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#8B5CF6" />
-            <stop offset="1" stopColor="#22D3EE" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
         <div>
           <div className="font-mono text-[10.5px] font-semibold tracking-[0.14em] uppercase text-gf-cyan mb-2">

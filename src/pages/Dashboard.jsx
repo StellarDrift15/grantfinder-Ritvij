@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Shell from "@/components/Shell";
 import ToolRail from "@/components/dashboard/ToolRail";
 import OrgProfileForm from "@/components/OrgProfileForm";
@@ -209,6 +210,32 @@ export default function Dashboard() {
   const [scanning, setScanning] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [scanError, setScanError] = useState(null);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const scanId = searchParams.get("scan");
+    if (!scanId) return;
+    (async () => {
+      setScanning(true);
+      try {
+        const [mrs, opps] = await Promise.all([
+          base44.entities.MatchingResults.filter({ search_id: scanId }),
+          base44.entities.FundingOpportunities.list("-created_date", 500),
+        ]);
+        const map = {};
+        (opps || []).forEach((o) => { map[o.id] = o; });
+        const enriched = (mrs || []).map((r) => ({ ...r, opportunity: map[r.funding_id] || {} }));
+        enriched.sort((a, b) => b.match_confidence - a.match_confidence);
+        setResults(enriched);
+        setHasScanned(true);
+      } catch (err) {
+        setScanError(err.message);
+        setHasScanned(true);
+      } finally {
+        setScanning(false);
+      }
+    })();
+  }, [searchParams]);
 
   const handleScanStart = () => {
     setScanning(true);

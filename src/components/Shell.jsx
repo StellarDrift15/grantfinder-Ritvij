@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import Logo from "./Logo";
 
-const NAV = ["Dashboard", "Discover", "Saved", "Reports"];
+const NAV = [
+  { label: "Dashboard", to: "/" },
+  { label: "Discover", to: "/discover" },
+  { label: "Saved", to: "/saved" },
+  { label: "Reports", to: "/reports" },
+];
 
 export default function Shell({ active = "Dashboard", children }) {
   const [initials, setInitials] = useState("GF");
+  const location = useLocation();
 
   useEffect(() => {
     base44
@@ -24,6 +30,16 @@ export default function Shell({ active = "Dashboard", children }) {
 
   return (
     <div className="min-h-screen bg-gf-ink text-gf-mid font-body">
+      {/* shared svg gradient def for eligibility rings */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="gfScoreGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#8B5CF6" />
+            <stop offset="1" stopColor="#22D3EE" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       {/* ambient aurora */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
@@ -47,28 +63,20 @@ export default function Shell({ active = "Dashboard", children }) {
       >
         <Logo />
         <nav className="hidden sm:flex gap-1 ml-2" aria-label="Primary">
-          {NAV.map((n) =>
-            n === "Dashboard" ? (
+          {NAV.map((n) => {
+            const isActive = active === n.label || location.pathname === n.to;
+            return (
               <Link
-                key={n}
-                to="/"
+                key={n.label}
+                to={n.to}
                 className={`px-3.5 py-1.5 rounded-lg text-[13.5px] font-medium transition ${
-                  active === n ? "text-gf-hi bg-gf-panel-hi" : "text-gf-mid hover:text-gf-hi hover:bg-gf-panel-hi"
+                  isActive ? "text-gf-hi bg-gf-panel-hi" : "text-gf-mid hover:text-gf-hi hover:bg-gf-panel-hi"
                 }`}
               >
-                {n}
+                {n.label}
               </Link>
-            ) : (
-              <span
-                key={n}
-                className={`px-3.5 py-1.5 rounded-lg text-[13.5px] font-medium transition ${
-                  active === n ? "text-gf-hi bg-gf-panel-hi" : "text-gf-mid"
-                }`}
-              >
-                {n}
-              </span>
-            )
-          )}
+            );
+          })}
         </nav>
         <div className="ml-auto flex items-center gap-3.5">
           <span

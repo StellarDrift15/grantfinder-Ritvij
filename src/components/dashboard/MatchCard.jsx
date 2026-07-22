@@ -1,52 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, Clock, Bookmark, BookmarkCheck, Pencil, ExternalLink } from "lucide-react";
-
-const TYPE_META = {
-  grant: { label: "Grant", cls: "text-[#C4B5FD] border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.14)]" },
-  inkind: { label: "In-kind", cls: "text-[#FCD34D] border-[rgba(251,191,36,0.28)] bg-[rgba(251,191,36,0.12)]" },
-  sponsor: { label: "Sponsorship", cls: "text-[#7DD3FC] border-[rgba(56,189,248,0.3)] bg-[rgba(56,189,248,0.12)]" },
-  voucher: { label: "Voucher", cls: "text-[#6EE7B7] border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)]" },
-};
-
-function mapType(t) {
-  if (t === "Cash Grant") return "grant";
-  if (t === "Material Sponsorship") return "inkind";
-  if (t === "Store Credit" || t === "Advertisement") return "voucher";
-  return "grant";
-}
-
-function fmtAmount(opp, typeKey) {
-  const v = opp.value_amount;
-  if (!v && v !== 0) return "—";
-  const s = "$" + Number(v).toLocaleString();
-  return typeKey === "voucher" ? s + " credit" : s;
-}
-
-function deadlineInfo(deadline) {
-  if (!deadline) return { label: "Rolling", soon: false };
-  const d = new Date(deadline);
-  if (isNaN(d.getTime())) return { label: "Rolling", soon: false };
-  const days = Math.ceil((d.getTime() - Date.now()) / 86400000);
-  if (days <= 0) return { label: "Closed", soon: false };
-  return {
-    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · " + days + " days",
-    soon: days <= 45,
-  };
-}
+import { TYPE_META, typeKeyOf, fmtAmount, deadlineInfo } from "@/lib/opportunity";
+import { toggleSaveOpportunity, findSavedByOpportunity } from "@/lib/saved";
 
 const C = 195.4;
 
 export default function MatchCard({ result, index }) {
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const opp = result.opportunity || {};
-  const typeKey = mapType(opp.type);
+  const typeKey = typeKeyOf(opp.type);
   const meta = TYPE_META[typeKey];
   const score = Math.round(result.match_confidence || 0);
   const offset = C * (1 - score / 100);
   const dl = deadlineInfo(opp.deadline);
   const tags = (opp.target_sectors || []).slice(0, 4);
+
+  useEffect(() => {
+    let on = true;
+    findSavedByOpportunity(opp.id)
+      .then((row) => { if (on) setSaved(!!row); })
+      .catch(() => {});
+    return () => { on = false; };
+  }, [opp.id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const now = await toggleSaveOpportunity(opp, score);
+      setSaved(now);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <motion.article
@@ -109,7 +97,7 @@ export default function MatchCard({ result, index }) {
       {/* side */}
       <div className="flex flex-col items-end gap-2 text-right">
         <div className="font-mono text-[15.5px] font-semibold text-gf-mint whitespace-nowrap">
-          {fmtAmount(opp, typeKey)}
+          {fmtAmount(opp.value_amount, typeKey)}
         </div>
         <span
           className={`inline-flex items-center gap-1 font-mono text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap border ${
@@ -122,8 +110,9 @@ export default function MatchCard({ result, index }) {
         </span>
         <div className="flex gap-2">
           <button
-            onClick={() => setSaved((s) => !s)}
-            className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold border transition inline-flex items-center gap-1 ${
+            onClick={handleSave}
+            disabled={saving}
+            className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold border transition inline-flex items-center gap-1 disabled:opacity-60 ${
               saved
                 ? "text-gf-mint border-[rgba(52,211,153,0.45)] bg-[rgba(52,211,153,0.08)]"
                 : "text-gf-mid border-gf-line-hi hover:text-gf-hi hover:border-[rgba(148,163,184,0.45)]"

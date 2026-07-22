@@ -1,0 +1,52 @@
+{
+  "name": "SavedOpportunity",
+  "type": "object",
+  "properties": {
+    "opportunity_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "funder": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "match_score": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "saved",
+        "drafting",
+        "submitted",
+        "decided"
+      ],
+      "default": "saved"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "won",
+        "lost"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "opportunity_id",
+    "title",
+    "status"
+  ]
+}
