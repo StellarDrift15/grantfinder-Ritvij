@@ -1,0 +1,21 @@
+{
+  "name": "UsageStat",
+  "type": "object",
+  "properties": {
+    "scope": {
+      "type": "string",
+      "default": "global"
+    },
+    "grants_clicked": {
+      "type": "number",
+      "default": 0
+    },
+    "rewrites_generated": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "scope"
+  ]
+}

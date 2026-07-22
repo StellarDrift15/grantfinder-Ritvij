@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import Shell from "@/components/Shell";
+import { trackRewrite } from "@/lib/usage";
 
 const inputBase =
   "w-full rounded-xl border border-gf-line bg-[rgba(7,11,20,0.55)] px-3.5 py-2.5 text-sm text-gf-hi placeholder:text-[#475569] focus:outline-none focus:border-[rgba(56,189,248,0.55)] focus:shadow-[0_0_0_3px_rgba(56,189,248,0.14)] transition";
@@ -124,6 +125,7 @@ Be direct and specific. Never say "this is great" unless it truly is. The goal i
       });
       setReview(res);
       setHasReviewed(true);
+      trackRewrite();
     } catch (err) {
       setError(err.message || "Something went wrong while reviewing your email.");
       setHasReviewed(true);

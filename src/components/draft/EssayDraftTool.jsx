@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { trackRewrite } from "@/lib/usage";
 
 const inputBase =
   "w-full rounded-xl border border-gf-line bg-[rgba(7,11,20,0.55)] px-3.5 py-2.5 text-sm text-gf-hi placeholder:text-[#475569] focus:outline-none focus:border-[rgba(139,92,246,0.55)] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.14)] transition";
@@ -71,6 +72,7 @@ ${prompt}
       });
       setDraft(res?.essay || "");
       setHasDrafted(true);
+      trackRewrite();
     } catch (err) {
       setError(err.message || "Something went wrong while drafting your essay.");
       setHasDrafted(true);
@@ -123,6 +125,7 @@ ${draft}
       });
       setSuggestions(res?.suggestions || []);
       setHasReviewed(true);
+      trackRewrite();
     } catch (err) {
       setError(err.message || "Something went wrong while reviewing your draft.");
       setHasReviewed(true);

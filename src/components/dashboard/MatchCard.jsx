@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Sparkles, Clock, Bookmark, BookmarkCheck, Pencil, ExternalLink } from "lucide-react";
 import { TYPE_META, typeKeyOf, fmtAmount, deadlineInfo } from "@/lib/opportunity";
 import { toggleSaveOpportunity, findSavedByOpportunity } from "@/lib/saved";
+import { trackGrantClick } from "@/lib/usage";
 
 const C = 195.4;
 
@@ -133,8 +134,9 @@ export default function MatchCard({ result, index }) {
             href={opp.application_url}
             target="_blank"
             rel="noreferrer"
+            onClick={trackGrantClick}
             className="text-[11.5px] text-gf-cyan hover:text-gf-sky inline-flex items-center gap-1 mt-0.5"
-          >
+            >
             Apply <ExternalLink size={11} />
           </a>
         )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Bookmark, BookmarkCheck, Clock } from "lucide-react";
 import { TYPE_META, typeKeyOf, fmtAmount, deadlineInfo } from "@/lib/opportunity";
+import { trackGrantClick } from "@/lib/usage";
 
 const C = 2 * Math.PI * 19; // r=19 for the 44px ring
 
@@ -25,7 +26,7 @@ export default function OpportunityCard({ opp, score, saved, onToggleSave }) {
 
   const Tag = opp.application_url ? "a" : "div";
   const tagProps = opp.application_url
-    ? { href: opp.application_url, target: "_blank", rel: "noreferrer" }
+    ? { href: opp.application_url, target: "_blank", rel: "noreferrer", onClick: trackGrantClick }
     : {};
 
   return (

@@ -4,6 +4,7 @@ import Shell from "@/components/Shell";
 import ToolRail from "@/components/dashboard/ToolRail";
 import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsArea from "@/components/dashboard/ResultsArea";
+import UsageStrip from "@/components/dashboard/UsageStrip";
 import { base44 } from "@/api/base44Client";
 
 function buildOpportunityReason(opportunity) {
@@ -264,6 +265,7 @@ export default function Dashboard() {
   return (
     <Shell active="Dashboard">
       <ToolRail />
+      <UsageStrip />
       <div className="grid lg:grid-cols-[400px_1fr] gap-[22px] items-start">
         <aside className="lg:sticky lg:top-[82px]">
           <OrgProfileForm onFormSubmit={handleFormSubmit} />
