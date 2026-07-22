@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Handshake, TrendingUp, ClipboardCheck, Gift, FileText, ArrowRight } from "lucide-react";
+import { Handshake, TrendingUp, ClipboardCheck, Gift, Mail, ArrowRight } from "lucide-react";
 
 const TOOLS = [
   {
@@ -26,7 +26,7 @@ const TOOLS = [
     to: "/draft-reviewer",
     Icon: ClipboardCheck,
     title: "Draft reviewer",
-    desc: "AI roleplays your target funder and critiques your application.",
+    desc: "Draft a grant essay or roleplay a funder to critique your application.",
     hue: "linear-gradient(90deg,#38BDF8,#22D3EE)",
     tint: "rgba(56,189,248,0.10)",
     border: "rgba(56,189,248,0.26)",
@@ -43,14 +43,14 @@ const TOOLS = [
     icon: "#FCD34D",
   },
   {
-    to: "/essay-drafter",
-    Icon: FileText,
-    title: "AI essay drafter",
-    desc: "Generate a grant essay from a prompt, then get clarity rewrites.",
-    hue: "linear-gradient(90deg,#8B5CF6,#6366F1)",
-    tint: "rgba(139,92,246,0.10)",
-    border: "rgba(139,92,246,0.28)",
-    icon: "#A78BFA",
+    to: "/cold-email-reviewer",
+    Icon: Mail,
+    title: "Cold email reviewer",
+    desc: "Grade rejection risk and rewrite cold emails to be specific.",
+    hue: "linear-gradient(90deg,#38BDF8,#22D3EE)",
+    tint: "rgba(56,189,248,0.10)",
+    border: "rgba(56,189,248,0.26)",
+    icon: "#7DD3FC",
   },
 ];
 

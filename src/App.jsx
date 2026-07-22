@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import ColdCallingPage from "./pages/ColdCallingPage";
 import SponsorshipFinder from "./pages/SponsorshipFinder";
 import DraftReviewer from "./pages/DraftReviewer";
-import EssayDrafter from "./pages/EssayDrafter";
+import ColdEmailReviewer from "./pages/ColdEmailReviewer";
 import InKindDonations from "./pages/InKindDonations";
 import Discover from "./pages/Discover";
 import Saved from "./pages/Saved";
@@ -47,7 +47,7 @@ const AuthenticatedApp = () => {
       <Route path="/cold-calling" element={<ColdCallingPage />} />
       <Route path="/sponsorship-finder" element={<SponsorshipFinder />} />
       <Route path="/draft-reviewer" element={<DraftReviewer />} />
-      <Route path="/essay-drafter" element={<EssayDrafter />} />
+      <Route path="/cold-email-reviewer" element={<ColdEmailReviewer />} />
       <Route path="/in-kind-donations" element={<InKindDonations />} />
       <Route path="/discover" element={<Discover />} />
       <Route path="/saved" element={<Saved />} />
