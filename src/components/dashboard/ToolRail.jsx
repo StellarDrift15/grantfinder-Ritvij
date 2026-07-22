@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Handshake, TrendingUp, ClipboardCheck, Gift, ArrowRight } from "lucide-react";
+import { Handshake, TrendingUp, ClipboardCheck, Gift, FileText, ArrowRight } from "lucide-react";
 
 const TOOLS = [
   {
@@ -41,6 +41,16 @@ const TOOLS = [
     tint: "rgba(251,191,36,0.10)",
     border: "rgba(251,191,36,0.26)",
     icon: "#FCD34D",
+  },
+  {
+    to: "/essay-drafter",
+    Icon: FileText,
+    title: "AI essay drafter",
+    desc: "Generate a grant essay from a prompt, then get clarity rewrites.",
+    hue: "linear-gradient(90deg,#8B5CF6,#6366F1)",
+    tint: "rgba(139,92,246,0.10)",
+    border: "rgba(139,92,246,0.28)",
+    icon: "#A78BFA",
   },
 ];
 
