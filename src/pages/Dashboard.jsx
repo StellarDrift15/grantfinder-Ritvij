@@ -6,6 +6,7 @@ import OrgProfileForm from "@/components/OrgProfileForm";
 import ResultsArea from "@/components/dashboard/ResultsArea";
 import UsageStrip from "@/components/dashboard/UsageStrip";
 import { base44 } from "@/api/base44Client";
+import { statesFromText, isLocationEligible } from "@/lib/location";
 
 function buildOpportunityReason(opportunity) {
   const title = opportunity.title;
@@ -53,7 +54,9 @@ async function runGrantScan(formData) {
     timestamp: new Date().toISOString(),
   });
 
-  const allOpportunities = await base44.entities.FundingOpportunities.list();
+  const _allOpportunities = await base44.entities.FundingOpportunities.list();
+  const npStates = statesFromText(formData.location);
+  const allOpportunities = _allOpportunities.filter((o) => isLocationEligible(o, npStates));
 
   const fllKeywords = ['fll', 'lego league', 'class pack', 'first lego'];
   const matchesFll = (o) => fllKeywords.some(k => (o.title + ' ' + (o.description || '') + ' ' + (o.target_sectors || []).join(' ')).toLowerCase().includes(k));
@@ -86,7 +89,7 @@ async function runGrantScan(formData) {
   const opportunitiesText = opportunities
     .map(
       (o, i) =>
-        `[${i + 1}] ID:${o.id} | ${o.title} | ${o.provider_name} | ${o.type} | $${o.value_amount} | Robotics:${o.accepts_robotics_teams} | Sectors:${(o.target_sectors || []).join(",")} | ${(o.description || "").slice(0, 120)}`
+        `[${i + 1}] ID:${o.id} | ${o.title} | ${o.provider_name} | ${o.type} | $${o.value_amount} | Robotics:${o.accepts_robotics_teams} | Sectors:${(o.target_sectors || []).join(",")} | Geo:${(o.eligible_locations || []).join("/") || "Any"} | ${(o.description || "").slice(0, 120)}`
     )
     .join("\n");
 
@@ -120,6 +123,7 @@ INSTRUCTIONS:
 2. ACCURACY IS CRITICAL: For each match, the match_reason MUST describe ONLY the opportunity identified by that funding_id. Read that opportunity's title, provider_name, and description carefully. Begin the match_reason by naming that opportunity's EXACT title verbatim from the list. NEVER describe or name a different grant, and never invent a title that is not in the list. If the program type does not match the team (e.g. an FTC/FRC-only grant for an FLL team, or an FLL-only grant for an FTC/FRC team), score it below 30 and exclude it.
 3. For opportunities scoring above 60, write a brief 2-sentence explanation of eligibility — specifically note how this type of funding (cash grant, store credit, or material sponsorship) benefits this particular organization.
 4. Return ONLY opportunities scoring above 60, sorted by score descending.
+5. LOCATION: Each opportunity has a Geo field. If Geo is "All 50 states"/"National"/"Nationwide"/"Any", it is eligible everywhere. Otherwise Geo lists specific states — the organization's location is "${formData.location || "Not specified"}". EXCLUDE (score below 30) any opportunity whose Geo does NOT include the organization's state. Prioritize regional grants whose Geo matches the organization's location.
 
 RESPONSE SCHEMA:
 {
