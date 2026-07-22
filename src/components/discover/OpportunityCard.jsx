@@ -12,7 +12,9 @@ export default function OpportunityCard({ opp, score, saved, onToggleSave }) {
   const tags = (opp.target_sectors || []).slice(0, 3);
   const offset = score != null ? C * (1 - score / 100) : C;
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
     setSaving(true);
     try {
       await onToggleSave();
@@ -21,8 +23,13 @@ export default function OpportunityCard({ opp, score, saved, onToggleSave }) {
     }
   };
 
+  const Tag = opp.application_url ? "a" : "div";
+  const tagProps = opp.application_url
+    ? { href: opp.application_url, target: "_blank", rel: "noreferrer" }
+    : {};
+
   return (
-    <div className="flex gap-4 p-4 rounded-[18px] border border-gf-line bg-gf-panel hover:bg-gf-panel-hi hover:border-gf-line-hi transition-colors">
+    <Tag {...tagProps} className="flex gap-4 p-4 rounded-[18px] border border-gf-line bg-gf-panel hover:bg-gf-panel-hi hover:border-gf-line-hi transition-colors">
       {score != null && (
         <div className="relative w-11 h-11 shrink-0" aria-label={`${score} percent match`}>
           <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
@@ -81,6 +88,6 @@ export default function OpportunityCard({ opp, score, saved, onToggleSave }) {
           {saved ? <BookmarkCheck size={11} /> : <Bookmark size={11} />} {saved ? "Saved" : "Save"}
         </button>
       </div>
-    </div>
+    </Tag>
   );
 }

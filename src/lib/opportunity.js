@@ -20,7 +20,7 @@ export function typeKeyOf(type) {
 }
 
 export function fmtAmount(value, typeKey) {
-  if (!value && value !== 0) return "—";
+  if (!value) return "Varies";
   const s = "$" + Number(value).toLocaleString();
   return typeKey === "voucher" ? s + " credit" : s;
 }
